@@ -24,7 +24,7 @@ An audit accepted by the guardian covers, at minimum:
 ## What we read first in the report
 
 - **All critical/high findings.** Every one has to be either fixed or
-  accepted-with-justification on the approval issue.
+  accepted-with-justification in the approval DM thread.
 - **Centralisation findings.** Anything that lets the adapter owner
   unilaterally change yield routing is a likely block.
 - **Reentrancy + approval-race findings.** If the auditor flagged either,

@@ -3,11 +3,6 @@
 UGM v2.1 won't let an adapter touch a grid until the Takeover guardian flips
 `approvedAdapters[adapter] = true`. This page is how you request that flip.
 
-> **Status:** the exact submission channel (Discord form vs. GitHub issue
-> template vs. on-chain registry) is being finalised. Treat the URLs and
-> handles below as canonical, but expect minor changes through the rest of
-> 2026.
-
 ## Who approves
 
 The **guardian** is the role on UGM v2.1 that calls
@@ -34,27 +29,57 @@ In order of weight:
 
 ## How to request approval
 
-> **Pending product sign-off:** confirm the channel below before publishing
-> these docs externally.
+**DM [@takeoverfun on X](https://x.com/takeoverfun).** That's the channel.
+No GitHub issue, no email form — direct message.
 
-The current expected flow is:
+Open the DM with a single message that contains all of the following.
+Reviewers will not chase missing info; an incomplete submission gets a
+"please re-send with everything" reply and goes to the back of the queue.
 
-1. **Open an issue** in [`takeoverapp/takeover-contracts`](https://github.com/takeoverapp/takeover-contracts)
-   with the `adapter-approval` label. Use the template (TBD).
-2. Include:
-   - Adapter source URL + commit hash.
-   - Audit report URL.
-   - Deployed addresses on Base Sepolia and (if applicable) Base.
-   - The pre-submission checklist with each item linked to the proof
-     (test name, audit page, etc.).
-   - One-paragraph description of the source protocol and what the adapter
-     does.
-3. A protocol team reviewer is assigned within 3 business days.
-4. Once reviewer approval is recorded on the issue, the guardian schedules
-   a multisig transaction. Expect 1–2 weeks from filing to flip on mainnet,
-   faster on Sepolia.
-5. The guardian transaction emits `ApprovedAdapterUpdated(adapter, true)`.
-   You're live.
+### What to include in the DM
+
+```text
+Adapter:           <name, e.g. "AcmeYieldAdapter">
+Source protocol:   <one line: "Acme V3 LP NFT fees on Base">
+Source URL:        <github link, pinned to commit hash>
+Commit hash:       <40-char hash>
+Audit report:      <public URL or attached PDF>
+Auditor:           <firm name>
+Sepolia deploy:    0x…  (verified on Sepolia Basescan)
+Mainnet deploy:    0x…  (or "not yet" if Sepolia-only)
+Owner address:     0x…  (multisig preferred)
+Yield token:       0x… symbol  (must match target grids)
+Asset-hash rule:   keccak256(abi.encodePacked(<source>, <id>))
+Pre-submission checklist: <link to a gist or repo file with each box ticked
+                          and a per-line proof: test name, audit page, etc.>
+Two-sentence pitch: what does the adapter do and why does it matter?
+```
+
+If your DM exceeds X's character limit, attach a single PDF or paste a gist.
+Don't split across multiple DMs.
+
+### What happens next
+
+1. A reviewer responds within **3 business days** to acknowledge receipt.
+2. Review takes **1–2 weeks** for mainnet, faster for Sepolia-only. The
+   reviewer will reply in the same DM thread with either:
+   - a list of concrete blockers, or
+   - a "scheduled" message confirming the multisig is queueing
+     `setApprovedAdapter(adapter, true)`.
+3. The guardian transaction emits `ApprovedAdapterUpdated(adapter, true)`.
+   You're live — register your first asset against any grid you have
+   creator rights on.
+
+### Why a DM and not a public issue?
+
+Two reasons. (1) A lot of the audit context is sensitive until the adapter
+is approved — funded exploits on a pre-approval adapter would be bad for
+both sides. (2) Approval signal is on-chain (`ApprovedAdapterUpdated`), so
+the audit trail is already public where it matters.
+
+If you want a public artifact for your own users, file a PR to this docs
+repo adding an [example walkthrough](../adapters/examples/flaunch.md) once
+you're approved.
 
 ## After approval
 
@@ -64,7 +89,8 @@ Once approved, a few things happen automatically:
   and starts surfacing per-asset accruals on `Grid.assets`.
 - Your adapter shows up in the docs (Tier 2 polish: file a PR adding an
   [example walkthrough](../adapters/examples/flaunch.md)).
-- Your adapter gets listed on [Deployments](../reference/deployments.md).
+- Your adapter gets listed on [Deployments](../reference/deployments.md) —
+  open a PR with the new addresses.
 
 ## Revocation
 
@@ -82,8 +108,8 @@ This is intentional: revocation has to be safe to use.
 
 ## What happens if we say no
 
-You'll get a written explanation on the issue. The most common rejection
-reasons:
+You'll get a written explanation in the DM thread. The most common
+rejection reasons:
 
 - "The audit didn't cover the swap path."
 - "Withdraw can strand seat holders" (your unwind condition isn't safe).
@@ -91,7 +117,8 @@ reasons:
 - "Yield can be re-routed by the adapter owner without seat-holder
   consent."
 
-These are usually fixable; you re-submit when the change lands.
+These are usually fixable; re-DM when the change lands and reference the
+prior thread.
 
 ## Where to next
 
