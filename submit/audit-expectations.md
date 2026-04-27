@@ -15,12 +15,6 @@ An audit accepted by the guardian covers, at minimum:
    even with a hostile owner — at minimum, they shouldn't be able to
    re-route registered assets or steal pending yield.
 
-## Out of scope (not your problem)
-
-- UGM v2.1 itself — already audited.
-- The source protocol — Takeover treats it as a black box.
-- The Takeover indexer — separate review.
-
 ## What we read first in the report
 
 - **All critical/high findings.** Every one has to be either fixed or

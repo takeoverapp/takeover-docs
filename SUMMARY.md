@@ -1,19 +1,20 @@
 # Table of contents
 
 * [Takeover Developer Docs](README.md)
+* [📜 Whitepaper](whitepaper.md)
 
 ## Overview
 
-* [What is Takeover](overview/what-is-takeover.md)
-* [The yield adapter model](overview/yield-adapter-model.md)
+* [📖 What is Takeover](overview/what-is-takeover.md)
+* [🔌 The yield adapter model](overview/yield-adapter-model.md)
 * [UGM v2.1](overview/ugm-v2.1.md)
 
 ## Adapters
 
 * [Adapter overview](adapters/overview.md)
-* [The IYieldAdapter interface](adapters/interface.md)
-* [Adapter lifecycle](adapters/lifecycle.md)
-* [Building a yield adapter](adapters/building-an-adapter.md)
+* [🧩 The IYieldAdapter interface](adapters/interface.md)
+* [🔄 Adapter lifecycle](adapters/lifecycle.md)
+* [🛠 Building a yield adapter](adapters/building-an-adapter.md)
 * [Yield token rules](adapters/yield-token-rules.md)
 * [Asset hashes](adapters/asset-hash.md)
 * [Testing your adapter](adapters/testing.md)
@@ -27,7 +28,7 @@
 ## Boards
 
 * [Creating a grid](boards/creating-a-grid.md)
-* [Wiring an adapter to a grid](boards/wiring-an-adapter.md)
+* [🎛 Wiring an adapter to a grid](boards/wiring-an-adapter.md)
 * [Multi-asset grids](boards/multi-asset-grids.md)
 
 ## Reference
@@ -36,11 +37,15 @@
 * [IGrid](reference/igrid.md)
 * [IFeeReceiver](reference/ifeereceiver.md)
 * [Events](reference/events.md)
-* [Deployments](reference/deployments.md)
+* [📍 Deployments](reference/deployments.md)
 * [Glossary](reference/glossary.md)
 
 ## Submit
 
-* [Pre-submission checklist](submit/checklist.md)
+* [✅ Pre-submission checklist](submit/checklist.md)
 * [Audit expectations](submit/audit-expectations.md)
-* [Adapter approval process](submit/adapter-approval-process.md)
+* [🛡 Adapter approval process](submit/adapter-approval-process.md)
+
+## Build with an agent
+
+* [Agent skill](SKILL.md)

@@ -1,8 +1,16 @@
-# Pre-submission checklist
+# ✅ Pre-submission checklist
 
 Before requesting [guardian approval](adapter-approval-process.md) for a new
 yield adapter, walk this list. Anything missing here is going to come back as
 a review comment.
+
+> **Building with an AI agent?** Every item here also lives in
+> [`submit/checklist.yml`](checklist.yml) with a structured `verify` hint
+> per item (ripgrep patterns, named tests, manual questions). Point your
+> agent at the YAML and ask it to produce a pass/fail row per `id`, then
+> paste the result into your DM to [@takeoverfun](https://x.com/takeoverfun)
+> alongside the prose responses. See [`SKILL.md`](../SKILL.md) for the full
+> agent workflow.
 
 ## Contract
 

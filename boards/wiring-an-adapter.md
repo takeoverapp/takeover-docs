@@ -1,4 +1,4 @@
-# Wiring an adapter to a grid
+# 🎛 Wiring an adapter to a grid
 
 This page is for **grid creators** — once an adapter has been built, audited,
 and approved by the Takeover guardian, what does *the protocol team launching

@@ -1,4 +1,4 @@
-# Deployments
+# 📍 Deployments
 
 Canonical contract addresses for Takeover on Base mainnet and Base Sepolia.
 
@@ -118,7 +118,7 @@ Additional Flaunch NFT deployment the indexer tracks: `0x7d375c9133721083df7b7e5
 ## Asset hash conventions
 
 The reference adapters use these preimages — match them so UI and indexer
-code can reconstruct hashes from on-chain identifiers.
+code can reconstruct hashes from onchain identifiers.
 
 | Source | Hash preimage |
 |---|---|

@@ -1,4 +1,4 @@
-# The `IYieldAdapter` interface
+# 🧩 The `IYieldAdapter` interface
 
 Every adapter implements two functions. That's it.
 

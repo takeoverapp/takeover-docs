@@ -1,4 +1,4 @@
-# Building a yield adapter
+# 🛠 Building a yield adapter
 
 This is the load-bearing page. By the end of it you'll have the shape of a
 contract that:

@@ -1,4 +1,4 @@
-# Adapter lifecycle
+# 🔄 Adapter lifecycle
 
 From "I have an unaudited contract on a fork" to "seat holders are claiming
 yield from my source", an adapter goes through five phases.

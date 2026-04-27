@@ -10,7 +10,7 @@ Every Takeover-specific term these docs use.
 | **Boardroom** | The hvTAKEOVER grid. Receives protocol-wide tax revenue and redistributes it to its own seat holders. `HV_GRID_ID = 0`. |
 | **Buyout** | Force-buying a held seat at the holder's self-assessed price. |
 | **Forfeiture** | Seat is auto-released when its deposit is exhausted by tax. |
-| **Grid** | The on-chain object backing a board. Identified by `gridId`. |
+| **Grid** | The onchain object backing a board. Identified by `gridId`. |
 | **Grid creator** | Address that called `createGrid`. Has special powers: register adapters, redirect tax/sale receivers, withdraw assets when they hold all seats. |
 | **Guardian** | Privileged role on UGM. Whitelists adapters/zaps/tax tokens, tunes protocol fees, can pause grids. Today: a Takeover protocol multisig. |
 | **Harberger taxation** | Self-assessed price + continuous tax + open buyouts. The ownership model every Takeover seat uses. |

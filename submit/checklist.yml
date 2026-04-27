@@ -1,0 +1,536 @@
+# Takeover yield-adapter pre-submission checklist
+#
+# Machine-readable companion to submit/checklist.md. Designed so an AI
+# coding agent can iterate every item against a candidate adapter repo
+# and produce a structured pass/fail report before a human DM to
+# @takeoverfun on X.
+#
+# Schema:
+#   id           Stable identifier (used in reports and DMs).
+#   category     contract | tests | audit | operational | documentation
+#   severity     must | should
+#   description  Prose from the human checklist.
+#   verify       Structured hint for an automated checker:
+#     kind: grep | grep_not | regex | test | chain | manual
+#     pattern: ripgrep pattern (kind: grep | grep_not | regex)
+#     glob:    file glob to constrain the search (optional)
+#     test:    forge test name (kind: test)
+#     question: human-resolvable question (kind: manual)
+#   refs         Doc links the agent should cite if the check fails.
+#
+# Convention: an item passes when EVERY `verify` block passes.
+
+version: 1
+schema: takeover-adapter-checklist/v1
+generated_for: UGM v2.1
+last_reviewed: 2026-04-27
+
+items:
+  # ─── Contract ────────────────────────────────────────────────────────
+  - id: contract.implements_iyieldadapter
+    category: contract
+    severity: must
+    description: >-
+      The adapter implements IYieldAdapter (collectYield + pendingYield)
+      with the exact signatures.
+    verify:
+      - kind: grep
+        pattern: 'function\s+collectYield\(bytes32\[\]\s+calldata\s+assetHashes\)\s+external'
+        glob: 'src/**/*.sol'
+      - kind: grep
+        pattern: 'function\s+pendingYield\(bytes32\s+assetHash\)\s+external\s+view\s+returns\s+\(uint256'
+        glob: 'src/**/*.sol'
+    refs:
+      - adapters/interface.md
+
+  - id: contract.collectyield_msg_sender_ugm_only
+    category: contract
+    severity: must
+    description: >-
+      collectYield reverts if msg.sender is not UGM.
+    verify:
+      - kind: grep
+        pattern: 'msg\.sender\s*!=\s*address\(ugm\)|msg\.sender\s*!=\s*address\(_ugm\)|NotUGM\(\)'
+        glob: 'src/**/*.sol'
+    refs:
+      - adapters/interface.md
+      - adapters/security.md
+
+  - id: contract.collectyield_idempotent
+    category: contract
+    severity: must
+    description: >-
+      collectYield is idempotent — second call with no source-side activity
+      moves zero tokens. (Verified primarily via the test in
+      tests.idempotent_collect_zero.)
+    verify:
+      - kind: manual
+        question: >-
+          Does collectYield return early / no-op when there is nothing to
+          collect (e.g., balance baseline check, lastFees comparison, or
+          equivalent)? Cite the lines.
+    refs:
+      - adapters/interface.md
+
+  - id: contract.collectyield_best_effort_per_asset
+    category: contract
+    severity: must
+    description: >-
+      collectYield is best-effort per asset — a problem with one asset
+      doesn't revert the whole batch. Look for try/catch on the per-asset
+      collect helper, or an explicit "skip on failure" branch.
+    verify:
+      - kind: regex
+        pattern: 'try\s+this\.\w+|try\s+_collectSingle|continue;\s*\}|skip|catch\s*\('
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Is the per-asset error path exercised by a test that registers a
+          fake/broken asset alongside good ones?
+    refs:
+      - adapters/interface.md
+
+  - id: contract.pendingyield_pure_view
+    category: contract
+    severity: must
+    description: >-
+      pendingYield is a pure view — never reverts on missing/zero state,
+      returns 0 for inactive assets.
+    verify:
+      - kind: grep
+        pattern: 'function\s+pendingYield[^{]*\bview\b'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Walk every branch of pendingYield. Confirm none of them can
+          revert, including: unknown assetHash, source contract paused,
+          token balance = 0, division by 0.
+    refs:
+      - adapters/interface.md
+
+  - id: contract.yield_in_grid_yield_token
+    category: contract
+    severity: must
+    description: >-
+      Yield is forwarded in the grid's yieldToken units. ETH-yield grids
+      accept flETH/WETH/ETH; ERC20-yield grids accept only that exact
+      token.
+    verify:
+      - kind: grep
+        pattern: 'receiveYieldETH|receiveYieldERC20'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Cite where the adapter checks/asserts the source token matches
+          the grid's yieldToken at deposit time, and where ETH-yield is
+          unwrapped (if applicable) before calling receiveYieldETH.
+    refs:
+      - adapters/yield-token-rules.md
+
+  - id: contract.forceapprove_for_erc20
+    category: contract
+    severity: must
+    description: >-
+      Uses forceApprove (not plain approve) for ERC20 approvals to UGM,
+      so USDT-style tokens don't revert on non-zero allowance.
+    verify:
+      - kind: grep
+        pattern: '\.forceApprove\('
+        glob: 'src/**/*.sol'
+      - kind: grep_not
+        pattern: 'IERC20\([^)]*\)\.approve\(.*ugm|approve\(address\(ugm\)'
+        glob: 'src/**/*.sol'
+    refs:
+      - adapters/security.md
+
+  - id: contract.deposit_gates_grid_creator
+    category: contract
+    severity: must
+    description: >-
+      Deposit is gated on the grid creator, read freshly from
+      ugm.gridConfig(gridId).
+    verify:
+      - kind: grep
+        pattern: 'gridConfig\([^)]*\)|ugm\.gridConfig'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Does deposit() compare msg.sender to the creator field returned
+          by gridConfig, with NotGridCreator() (or equivalent) on
+          mismatch?
+    refs:
+      - adapters/lifecycle.md
+
+  - id: contract.deposit_yield_token_match
+    category: contract
+    severity: must
+    description: >-
+      Deposit verifies that the source-side asset's yield denomination
+      matches the grid's yieldToken.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the exact check: e.g., require that the LP pool's currency0
+          or currency1 == grid.yieldToken, or that the Flaunch coin's fee
+          token is flETH for an ETH-yield grid.
+    refs:
+      - adapters/yield-token-rules.md
+
+  - id: contract.asset_hash_unique_includes_source
+    category: contract
+    severity: must
+    description: >-
+      assetHash is unique per source-side object and includes the source
+      contract address in its preimage.
+    verify:
+      - kind: regex
+        pattern: 'keccak256\(\s*abi\.encodePacked\([^)]*\b(positionManager|flaunch|nft|source|token)\b[^)]*\)'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Confirm the preimage cannot collide across two adapters
+          targeting different source contracts.
+    refs:
+      - adapters/asset-hash.md
+
+  - id: contract.withdraw_gated
+    category: contract
+    severity: must
+    description: >-
+      Withdraw is gated. Default reference gate is "grid creator holds
+      all 100 seats". A different gate is acceptable but must be
+      documented on the example page.
+    verify:
+      - kind: grep
+        pattern: 'holderSeatCount|seatCount\(.*creator|allSeats|NotAllSeatsHeld'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          What is the exact withdraw gate? Cite it.
+    refs:
+      - adapters/lifecycle.md
+
+  - id: contract.withdraw_sweeps_last_yield
+    category: contract
+    severity: must
+    description: >-
+      Withdraw sweeps the last yield (e.g. _collectSingle) before
+      transferring the source-side asset back to the creator.
+    verify:
+      - kind: manual
+        question: >-
+          Does withdraw call the per-asset collect helper (or equivalent)
+          before the asset transfer? Cite the lines.
+    refs:
+      - adapters/lifecycle.md
+
+  - id: contract.no_eoa_only_entrypoints
+    category: contract
+    severity: must
+    description: >-
+      No tx.origin checks or EOA-only modifiers. UI, zaps, and contracts
+      all need to be able to integrate.
+    verify:
+      - kind: grep_not
+        pattern: 'tx\.origin|onlyEOA|isContract\(.*\)\s*=='
+        glob: 'src/**/*.sol'
+    refs:
+      - adapters/security.md
+
+  - id: contract.owner_set_rescues_owner_only
+    category: contract
+    severity: must
+    description: >-
+      Owner is set in the constructor; emergency rescue functions are
+      owner-only.
+    verify:
+      - kind: grep
+        pattern: '_initializeOwner|Ownable|onlyOwner'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          List every owner-only function. Confirm none of them can
+          re-route registered assets or steal pending yield.
+    refs:
+      - submit/audit-expectations.md
+
+  - id: contract.no_unbounded_loops
+    category: contract
+    severity: must
+    description: >-
+      No unbounded loops on a hot path. Per-call work is capped.
+    verify:
+      - kind: manual
+        question: >-
+          For every loop in collectYield, deposit, withdraw, claim,
+          identify the bound. If the bound is "length of an array the
+          caller controls", show why a malicious caller cannot grow it
+          unboundedly.
+    refs:
+      - adapters/security.md
+
+  - id: contract.reentrancy_layout
+    category: contract
+    severity: must
+    description: >-
+      Adapter-only entrypoints (deposit, withdraw, poke, flush) are
+      nonReentrant. collectYield is NOT nonReentrant — UGM already holds
+      its lock on that path.
+    verify:
+      - kind: grep
+        pattern: 'function\s+(deposit|withdraw|poke|flush)[^{]*nonReentrant'
+        glob: 'src/**/*.sol'
+      - kind: grep_not
+        pattern: 'function\s+collectYield[^{]*nonReentrant'
+        glob: 'src/**/*.sol'
+    refs:
+      - adapters/security.md
+      - adapters/interface.md
+
+  # ─── Tests ───────────────────────────────────────────────────────────
+  - id: tests.happy_path_deposit_claim
+    category: tests
+    severity: must
+    description: >-
+      Happy path: deposit + claimFees moves seat balance.
+    verify:
+      - kind: manual
+        question: >-
+          Name the test (file + function) and the asserted balance
+          delta.
+    refs:
+      - adapters/testing.md
+
+  - id: tests.idempotent_collect_zero
+    category: tests
+    severity: must
+    description: >-
+      Calling claimFees twice in a row collects zero on the second call.
+    verify:
+      - kind: manual
+        question: >-
+          Name the test and the assertion that the second call's transfer
+          amount is 0.
+    refs:
+      - adapters/testing.md
+
+  - id: tests.fakehash_no_op
+    category: tests
+    severity: must
+    description: >-
+      collectYield([fakeHash]) is a no-op, not a revert.
+    verify:
+      - kind: manual
+        question: >-
+          Name the test and the un-asserted-revert wrapping.
+    refs:
+      - adapters/testing.md
+
+  - id: tests.collect_only_from_ugm
+    category: tests
+    severity: must
+    description: >-
+      collectYield from any non-UGM caller reverts.
+    verify:
+      - kind: manual
+        question: Name the test.
+    refs:
+      - adapters/security.md
+
+  - id: tests.incompatible_yield_token
+    category: tests
+    severity: must
+    description: >-
+      Deposit on a grid with an incompatible yieldToken reverts.
+    verify:
+      - kind: manual
+        question: Name the test.
+    refs:
+      - adapters/yield-token-rules.md
+
+  - id: tests.withdraw_seat_gating
+    category: tests
+    severity: must
+    description: >-
+      Withdraw without all seats reverts; with all seats succeeds.
+    verify:
+      - kind: manual
+        question: Name both tests.
+    refs:
+      - adapters/lifecycle.md
+
+  - id: tests.approval_revoke_path
+    category: tests
+    severity: must
+    description: >-
+      After setApprovedAdapter(adapter, false), deposit reverts but
+      residual yield still pushes and withdrawAsset still works for
+      already-registered assets.
+    verify:
+      - kind: manual
+        question: Name the test(s).
+    refs:
+      - submit/adapter-approval-process.md
+
+  - id: tests.swap_path_fuzz
+    category: tests
+    severity: should
+    description: >-
+      If the adapter swaps, the swap path is fuzzed on edge prices
+      (very low / very high sqrtPriceX96).
+    verify:
+      - kind: manual
+        question: >-
+          Does the adapter swap? If yes, name the fuzz test and its
+          bounds.
+    refs:
+      - adapters/security.md
+
+  - id: tests.coverage_collectyield_branches
+    category: tests
+    severity: must
+    description: >-
+      Foundry coverage is clean. Branch coverage on collectYield and any
+      conversion helpers is near 100%.
+    verify:
+      - kind: manual
+        question: >-
+          Attach the relevant lines from `forge coverage --report
+          summary` for collectYield and helpers.
+    refs:
+      - adapters/testing.md
+
+  - id: tests.fork_test
+    category: tests
+    severity: must
+    description: >-
+      At least one fork test against the real source protocol on Base or
+      Base Sepolia.
+    verify:
+      - kind: manual
+        question: >-
+          Name the fork test and the block number / fork URL it pins.
+    refs:
+      - adapters/testing.md
+
+  # ─── Audit ───────────────────────────────────────────────────────────
+  - id: audit.external_complete
+    category: audit
+    severity: must
+    description: >-
+      External audit complete. Auditor and report attached to the
+      approval DM.
+    verify:
+      - kind: manual
+        question: >-
+          Auditor name + report URL or PDF + commit hash audited.
+    refs:
+      - submit/audit-expectations.md
+
+  - id: audit.findings_resolved
+    category: audit
+    severity: must
+    description: >-
+      All critical/high findings resolved or
+      accepted-with-justification.
+    verify:
+      - kind: manual
+        question: >-
+          List every C/H finding from the report and its resolution
+          (commit hash or written justification).
+    refs:
+      - submit/audit-expectations.md
+
+  - id: audit.slither_clean
+    category: audit
+    severity: should
+    description: >-
+      If Slither was used, the run is clean (or every suppression is
+      documented).
+    verify:
+      - kind: manual
+        question: >-
+          Paste `slither .` summary, or document each suppression and
+          its rationale.
+    refs:
+      - submit/audit-expectations.md
+
+  # ─── Operational ────────────────────────────────────────────────────
+  - id: operational.deploy_script_reproducible
+    category: operational
+    severity: must
+    description: >-
+      Adapter deployment script is reproducible (CREATE2 salt or
+      forge-script with --slow + env-var-driven config).
+    verify:
+      - kind: manual
+        question: >-
+          Cite the script file and the salt / env var inputs.
+    refs:
+      - reference/deployments.md
+
+  - id: operational.same_address_per_chain
+    category: operational
+    severity: should
+    description: >-
+      Adapter address is the same on every chain you intend to support
+      (CREATE2). Not strictly required, but expected.
+    verify:
+      - kind: manual
+        question: >-
+          List the deployed addresses per chain.
+    refs:
+      - reference/deployments.md
+
+  - id: operational.pitch_lines
+    category: operational
+    severity: must
+    description: >-
+      You can produce a 1-line "what does this adapter do" sentence and
+      a 5-line "how the source produces yield" paragraph for the
+      example page.
+    verify:
+      - kind: manual
+        question: Paste both.
+    refs:
+      - adapters/examples/flaunch.md
+
+  - id: operational.owner_key_story
+    category: operational
+    severity: must
+    description: >-
+      A wallet/key story for the adapter's Ownable role — multisig
+      preferred for anything in production.
+    verify:
+      - kind: manual
+        question: >-
+          Owner address, key custody (multisig / EOA / TSS), and
+          rotation plan.
+    refs:
+      - submit/audit-expectations.md
+
+  # ─── Documentation ──────────────────────────────────────────────────
+  - id: docs.example_walkthrough
+    category: documentation
+    severity: must
+    description: >-
+      Example walkthrough written: copy adapters/examples/flaunch.md,
+      replace the contract-specific bits, add to SUMMARY.md.
+    verify:
+      - kind: manual
+        question: PR URL adding the example page.
+    refs:
+      - adapters/examples/flaunch.md
+
+  - id: docs.cross_links_for_novel_patterns
+    category: documentation
+    severity: should
+    description: >-
+      Any new pattern (push-only, multi-source, novel asset-hash
+      convention) is cross-linked from adapters/building-an-adapter.md.
+    verify:
+      - kind: manual
+        question: >-
+          List any novel pattern and the cross-link.
+    refs:
+      - adapters/building-an-adapter.md

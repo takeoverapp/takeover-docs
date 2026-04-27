@@ -1,4 +1,4 @@
-# What is Takeover
+# 📖 What is Takeover
 
 Takeover is a protocol for **fractional, continuously contestable ownership of
 onchain yield**. Each yield-producing asset (a Uniswap LP, a Flaunch memecoin,
@@ -20,7 +20,7 @@ yield value, and rotates ownership toward whoever values the seat most.
 In product language, a grid is a **board**. The two terms are used
 interchangeably in these docs:
 
-- **Grid** when we're talking about the on-chain object (`gridId`,
+- **Grid** when we're talking about the onchain object (`gridId`,
   `gridConfig`, etc.).
 - **Board** when we're talking about the user-facing concept ("the Boardroom",
   "the USDC board", etc.).

@@ -1,4 +1,4 @@
-# The yield adapter model
+# 🔌 The yield adapter model
 
 UGM v2.1 doesn't know anything about Uniswap, Flaunch, or any other yield
 source. It only knows about three things:

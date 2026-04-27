@@ -1,4 +1,4 @@
-# Adapter approval process
+# 🛡 Adapter approval process
 
 UGM v2.1 won't let an adapter touch a grid until the Takeover guardian flips
 `approvedAdapters[adapter] = true`. This page is how you request that flip.
@@ -74,7 +74,7 @@ Don't split across multiple DMs.
 
 Two reasons. (1) A lot of the audit context is sensitive until the adapter
 is approved — funded exploits on a pre-approval adapter would be bad for
-both sides. (2) Approval signal is on-chain (`ApprovedAdapterUpdated`), so
+both sides. (2) Approval signal is onchain (`ApprovedAdapterUpdated`), so
 the audit trail is already public where it matters.
 
 If you want a public artifact for your own users, file a PR to this docs

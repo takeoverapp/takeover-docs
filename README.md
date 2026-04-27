@@ -6,10 +6,14 @@ documentation for [Takeover](https://takeover.fun).
 If you are a protocol engineer and want your protocol's yield to flow into a
 Takeover board (a UGM v2.1 grid), start here:
 
-1. [Overview — what is Takeover](overview/what-is-takeover.md)
-2. [The yield adapter model](overview/yield-adapter-model.md)
-3. [Building a yield adapter](adapters/building-an-adapter.md)
-4. [Submission checklist](submit/checklist.md)
+1. [📜 Whitepaper](whitepaper.md) — protocol design and Harberger mechanics
+2. [📖 What is Takeover](overview/what-is-takeover.md)
+3. [🔌 The yield adapter model](overview/yield-adapter-model.md)
+4. [🛠 Building a yield adapter](adapters/building-an-adapter.md)
+5. [✅ Submission checklist](submit/checklist.md)
+
+Building with an AI agent? Start at [`SKILL.md`](SKILL.md) — it points the
+agent at the right pages and the [machine-readable checklist](submit/checklist.yml).
 
 ## Repository
 
