@@ -3,6 +3,11 @@
 The simplest reference adapter, and a good first read.
 
 > Source: [`takeoverapp/takeover-contracts/src/FlaunchYieldAdapter.sol`](https://github.com/takeoverapp/takeover-contracts/blob/main/src/FlaunchYieldAdapter.sol).
+>
+> **Status:** the live deployments of this adapter are registered against
+> **UGM v2** today, not v2.1 — see [Deployments](../../reference/deployments.md).
+> The pattern below is correct for a v2.1 adapter; a fork only needs the
+> constructor's UGM address swapped.
 
 ## What it does
 

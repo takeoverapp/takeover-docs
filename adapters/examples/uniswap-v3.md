@@ -1,6 +1,10 @@
 # Example: `V3YieldAdapter`
 
 > **Tier 2 placeholder.** Full annotated walkthrough of the V3 adapter.
+>
+> **Status:** the live deployment targets **UGM v2** today. See
+> [Deployments](../../reference/deployments.md). Pattern carries over to
+> v2.1; only the constructor's UGM address changes.
 
 ## Pattern: two-token swap-and-forward
 

@@ -80,6 +80,12 @@ invariants UGM enforces.
 
 ## Step 3: scaffold the contract
 
+> **Which UGM do I point at?** New adapters should target **UGM v2.1**.
+> See [Deployments](../reference/deployments.md) for the chain-specific
+> address. The reference adapters (`FlaunchYieldAdapter`, `V3YieldAdapter`,
+> `V4YieldAdapter`) currently sit on the older v2 UGM — their patterns are
+> still right, you just swap the constructor address.
+
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
