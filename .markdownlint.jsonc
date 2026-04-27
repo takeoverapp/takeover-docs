@@ -1,0 +1,13 @@
+{
+  // Don't enforce a fixed line length — prose wraps where it reads best.
+  "MD013": false,
+  // Allow inline HTML (mermaid blocks, GitBook hints).
+  "MD033": false,
+  // Allow first-line h1 to repeat across files.
+  "MD041": false,
+  // Require fenced code blocks to declare a language.
+  "MD040": true,
+  // Require headings to be in sentence case is not enforceable; document
+  // it in CONTRIBUTING.md instead.
+  "default": true
+}
