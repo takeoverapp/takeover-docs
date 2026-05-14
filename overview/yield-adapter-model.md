@@ -1,6 +1,6 @@
 # 🔌 The yield adapter model
 
-UGM v2.1 doesn't know anything about Uniswap, Flaunch, or any other yield
+UGM v2.3 doesn't know anything about Uniswap, Flaunch, or any other yield
 source. It only knows about three things:
 
 1. **Grids** — seat ledgers with a configured `yieldToken` (ETH or one ERC20).
@@ -25,7 +25,7 @@ Adapters bridge the gap. An adapter is a contract that:
 flowchart LR
     Source["External protocol\n(Uniswap, Flaunch, …)"]
     Adapter["Yield adapter\n(IYieldAdapter)"]
-    UGM["UGM v2.1"]
+    UGM["UGM v2.3"]
     Holders["Seat holders"]
 
     Source -- "fees in source token(s)" --> Adapter
@@ -46,7 +46,7 @@ To make sure the latest yield is reflected the moment a holder claims, UGM
 sequenceDiagram
     autonumber
     participant H as Seat holder
-    participant U as UGM v2.1
+    participant U as UGM v2.3
     participant A as Adapter
     participant S as Source protocol
 
@@ -69,7 +69,7 @@ That one round-trip is the entire push/pull contract:
 
 ## Why an adapter, not a hook on UGM
 
-UGM v2.1 is **immutable**. There is no upgrade lever, no plugin slot for new
+UGM v2.3 is **immutable**. There is no upgrade lever, no plugin slot for new
 yield sources. The only extension surface is the adapter registry: the
 guardian whitelists an adapter address (`setApprovedAdapter`), the adapter
 calls `registerAsset(gridId, assetHash)` to claim an asset on a grid, and from

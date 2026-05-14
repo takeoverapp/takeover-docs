@@ -64,7 +64,7 @@ After registration, the lifecycle steady state kicks in:
 sequenceDiagram
     autonumber
     participant H as Seat holder
-    participant U as UGM v2.1
+    participant U as UGM v2.3
     participant A as Adapter
     participant S as Source protocol
 

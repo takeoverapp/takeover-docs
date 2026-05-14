@@ -1,51 +1,43 @@
-# 📍 Deployments
+# Deployments
 
 Canonical contract addresses for Takeover on Base mainnet and Base Sepolia.
 
-> **A note on UGM versions.** Two UGM contracts are live today:
->
-> - **UGM v2.1** — what these docs target. Hosts the Boardroom (hvTAKEOVER)
->   today and is where new adapters should be registered.
-> - **UGM v2** — the older deployment. Currently hosts the production grids
->   that use `FlaunchYieldAdapter`, `V3YieldAdapter`, and `V4YieldAdapter`.
->   Those adapters are great pattern references; a v2.1 fork follows the
->   same shape but points its constructor at the v2.1 UGM address.
->
-> When in doubt: **new adapter ⇒ register on UGM v2.1**.
+> **Target version: UGM v2.3** across both networks. The protocol guardian
+> writes new approvals against v2.3; new adapter and hook submissions
+> register against v2.3. Older versions remain readable on-chain for
+> historical grids but are no longer the integration target.
+
+The single source of truth for these addresses is the SDK preset:
+
+```ts
+import { base, sepolia } from '@takeover/sdk';
+
+base.ugmV23;            // 0xac02F47a3E4451f96c715313C8894c3041413F3A
+base.library;           // 0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E
+base.yieldAdapters.v3;  // 0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9
+sepolia.ugmV23;         // 0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C
+```
+
+The Builder portal `/builders/contracts` page reads from the same preset
+and is interactively switchable between mainnet and Sepolia.
 
 ## Base mainnet (chain 8453)
 
-### UGM v2.1 (primary)
+### UGM v2.3
 
 | Contract | Address |
 |---|---|
-| `UnifiedGridManagerV21` | [`0x5455DB84A922eB6B29D8E7e3675e01a1436A735f`](https://basescan.org/address/0x5455DB84A922eB6B29D8E7e3675e01a1436A735f) |
-| `ProtocolYieldAdapter` (HV adapter) | [`0x35caE134A6DdB3C9D0BB10ceBe404DdaD8b0Bb0A`](https://basescan.org/address/0x35caE134A6DdB3C9D0BB10ceBe404DdaD8b0Bb0A) |
-| HV governance module | [`0x2e69A3dC3A8E2aA5fF380f16b23F8eCcCFDC0037`](https://basescan.org/address/0x2e69A3dC3A8E2aA5fF380f16b23F8eCcCFDC0037) |
-| Boardroom grid ID | `0` |
-| Boardroom tax token (`TAKEOVER`) | [`0x716F8E756f9277F8c9949926141C2666B86B5809`](https://basescan.org/address/0x716F8E756f9277F8c9949926141C2666B86B5809) |
+| `UnifiedGridManagerV23` | [`0xac02F47a3E4451f96c715313C8894c3041413F3A`](https://basescan.org/address/0xac02F47a3E4451f96c715313C8894c3041413F3A) |
+| `UGMV23Linked` (linked library) | [`0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E`](https://basescan.org/address/0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E) |
+| `FlaunchYieldAdapter` (v2.3) | [`0x2c242993A6959D9eF8e065C089054206e385245e`](https://basescan.org/address/0x2c242993A6959D9eF8e065C089054206e385245e) |
+| `V3YieldAdapter` (v2.3) | [`0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9`](https://basescan.org/address/0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9) |
+| `V4YieldAdapter` (v2.3) | [`0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af`](https://basescan.org/address/0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af) |
+| Guardian | [`0x6b9Db1337B37426a7911e4108d27D44393B95eec`](https://basescan.org/address/0x6b9Db1337B37426a7911e4108d27D44393B95eec) |
 
-### UGM v2 (legacy reference)
-
-| Contract | Address |
-|---|---|
-| `UnifiedGridManager` (v2) | [`0x107Aba3406b3fcb93D1919BFE5c082A5f4d28A22`](https://basescan.org/address/0x107Aba3406b3fcb93D1919BFE5c082A5f4d28A22) |
-| `FlaunchYieldAdapter` | [`0xd631b14727836824a87012B9E566Ebae159E0969`](https://basescan.org/address/0xd631b14727836824a87012B9E566Ebae159E0969) |
-| `V3YieldAdapter` | [`0xeE1e0bcE34022d9a0c40614bC972F437504257bc`](https://basescan.org/address/0xeE1e0bcE34022d9a0c40614bC972F437504257bc) |
-| `V4YieldAdapter` | [`0xA5B1128Baa4c4Bf5EE6Ccb7F7fc6BC7cE1961082`](https://basescan.org/address/0xA5B1128Baa4c4Bf5EE6Ccb7F7fc6BC7cE1961082) |
-| `GridLaunchZap` | [`0x2d2d21236149e0bBF496bE3155D9F48b17616850`](https://basescan.org/address/0x2d2d21236149e0bBF496bE3155D9F48b17616850) |
-| `V2_SWAP_EXECUTOR` | [`0x1f6e38610343301c2B3C328C271b2dd62DdfA1c8`](https://basescan.org/address/0x1f6e38610343301c2B3C328C271b2dd62DdfA1c8) |
-| `V2_BUYBACK_KEEPER` | [`0x17a9AEa1Ddf95B6aDB627dCcd234278cae6c2Ee2`](https://basescan.org/address/0x17a9AEa1Ddf95B6aDB627dCcd234278cae6c2Ee2) |
-| `V2_MIGRATION_ZAP` | [`0x430851df92db6831809da73dA4AB87748AeD3546`](https://basescan.org/address/0x430851df92db6831809da73dA4AB87748AeD3546) |
-
-### Legacy v1
-
-| Contract | Address |
-|---|---|
-| `TakeoverFeeSplitManager` (TSFM) factory | [`0xAbB70c40b74ec358220ef3FDe25563f58d37366C`](https://basescan.org/address/0xAbB70c40b74ec358220ef3FDe25563f58d37366C) |
-| `TakeoverZap` | [`0x3d5EadF1585dC98eD306C81214574F75a99e8290`](https://basescan.org/address/0x3d5EadF1585dC98eD306C81214574F75a99e8290) |
-| `TakeoverBuyback` | [`0x743e0d6C56D0fC701ce0a4bA167F5bb24CA41ed5`](https://basescan.org/address/0x743e0d6C56D0fC701ce0a4bA167F5bb24CA41ed5) |
-| Graduation Zap | [`0x624c6353bD796Fd5134A1D1C76891B602c62A039`](https://basescan.org/address/0x624c6353bD796Fd5134A1D1C76891B602c62A039) |
+The `UGMV23Linked` library is `DELEGATECALL`'d from
+`UnifiedGridManagerV23` so the main contract image stays under the
+EIP-170 24,576-byte cap. The library has no storage of its own; UGM is
+the storage root.
 
 ### Source-protocol references
 
@@ -66,39 +58,23 @@ Additional Flaunch NFT deployments the indexer tracks: `0xb4512bf57d50fbcb64a3ad
 
 ## Base Sepolia (chain 84532)
 
-### UGM v2.1 (primary)
+### UGM v2.3
 
 | Contract | Address |
 |---|---|
-| `UnifiedGridManagerV21` | [`0x9ce222e1fe1F4301c4E36aFc9fbF7394952894b9`](https://sepolia.basescan.org/address/0x9ce222e1fe1F4301c4E36aFc9fbF7394952894b9) |
-| `ProtocolYieldAdapter` (HV adapter) | [`0xBB58422B2D440857e40AF528677Ba059d910349B`](https://sepolia.basescan.org/address/0xBB58422B2D440857e40AF528677Ba059d910349B) |
-| HV governance module | [`0x609c611Fb4D68F2Eab24e4F02c257919f98B9605`](https://sepolia.basescan.org/address/0x609c611Fb4D68F2Eab24e4F02c257919f98B9605) |
-| Boardroom grid ID | `0` |
-| Boardroom tax token (`TAKEOVER`) | [`0xe834c1a11fc37354e6a135d643f7969da4fc1561`](https://sepolia.basescan.org/address/0xe834c1a11fc37354e6a135d643f7969da4fc1561) |
+| `UnifiedGridManagerV23` | [`0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`](https://sepolia.basescan.org/address/0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C) |
+| `UGMV23Linked` (linked library) | [`0x989cfDE8a2D85e913446E782F73Aaa5Ab226eCb1`](https://sepolia.basescan.org/address/0x989cfDE8a2D85e913446E782F73Aaa5Ab226eCb1) |
+| `FlaunchYieldAdapter` (v2.3) | _pending — not yet deployed_ |
+| `V3YieldAdapter` (v2.3) | _pending — not yet deployed_ |
+| `V4YieldAdapter` (v2.3) | _pending — not yet deployed_ |
+| Guardian | [`0x0646441c3eC556c1994420C3F9B0f31279BEfb6e`](https://sepolia.basescan.org/address/0x0646441c3eC556c1994420C3F9B0f31279BEfb6e) |
 
-### UGM v2 (legacy reference)
-
-| Contract | Address |
-|---|---|
-| `UnifiedGridManager` (v2) | [`0x50aa815b0FCd2686CD61d1bDd61188611f8367bF`](https://sepolia.basescan.org/address/0x50aa815b0FCd2686CD61d1bDd61188611f8367bF) |
-| `FlaunchYieldAdapter` | [`0xE80419EBD8aFEe8dcD86BaF0b971E25Ef0244890`](https://sepolia.basescan.org/address/0xE80419EBD8aFEe8dcD86BaF0b971E25Ef0244890) |
-| `V3YieldAdapter` | [`0x4918ca4d0b1426649B87Fa40EaA22B28D36A594c`](https://sepolia.basescan.org/address/0x4918ca4d0b1426649B87Fa40EaA22B28D36A594c) |
-| `V4YieldAdapter` | [`0x026E11F0220e22c7306e939EEaC682672053765A`](https://sepolia.basescan.org/address/0x026E11F0220e22c7306e939EEaC682672053765A) |
-| `GridLaunchZap` | [`0x78F7B9912882E0d0d4A6b1551E7288bf004B5e65`](https://sepolia.basescan.org/address/0x78F7B9912882E0d0d4A6b1551E7288bf004B5e65) |
-| `V2_SWAP_EXECUTOR` | [`0x2cc144Dc69EB27613cff6C9C6f9e61EEc2661966`](https://sepolia.basescan.org/address/0x2cc144Dc69EB27613cff6C9C6f9e61EEc2661966) |
-| `V2_BUYBACK_KEEPER` | [`0xa47855b51dA1DCE5A1dEBD2998c4371Bc6810e66`](https://sepolia.basescan.org/address/0xa47855b51dA1DCE5A1dEBD2998c4371Bc6810e66) |
-| `V2_MIGRATION_ZAP` | [`0x4e46a9C23aaA33283224479Ef9d3de96deE2fC7e`](https://sepolia.basescan.org/address/0x4e46a9C23aaA33283224479Ef9d3de96deE2fC7e) |
-
-### Legacy v1
-
-| Contract | Address |
-|---|---|
-| `TakeoverFeeSplitManager` (TSFM) factory | [`0xE911E8122948a2a6f25E415b1CE0De19fB130fB2`](https://sepolia.basescan.org/address/0xE911E8122948a2a6f25E415b1CE0De19fB130fB2) |
-| `TakeoverZap` | [`0xA9545E24f94B8801D54dbD2D298017A8A67cF712`](https://sepolia.basescan.org/address/0xA9545E24f94B8801D54dbD2D298017A8A67cF712) |
-| `TakeoverBuyback` | [`0x32Bc24A5CB7144aE260441f7344b55A08f588672`](https://sepolia.basescan.org/address/0x32Bc24A5CB7144aE260441f7344b55A08f588672) |
-| Graduation Zap | [`0x9104e94a3b3560EcC4a34d364E0aa05A07272c71`](https://sepolia.basescan.org/address/0x9104e94a3b3560EcC4a34d364E0aa05A07272c71) |
-| LP Graduation Zap | [`0xac481127bc1dcdf14677b3f9fbc382eb8d75ed0d`](https://sepolia.basescan.org/address/0xac481127bc1dcdf14677b3f9fbc382eb8d75ed0d) |
-| UV4 yield interface | [`0x5c2b4dfd01e42df1ac5b1e11f759a8387f68b452`](https://sepolia.basescan.org/address/0x5c2b4dfd01e42df1ac5b1e11f759a8387f68b452) |
+> **Sepolia adapters not yet deployed.** UGM v2.3 + library are live on
+> Sepolia for builders to integrate against, but the v2.3 adapter trio
+> hasn't been redeployed onto Sepolia yet. Builders testing yield flows
+> on Sepolia today need to write against UGM directly (deposit asset,
+> push yield via `receiveYieldERC20` / `receiveYieldETH`) or wait for
+> the redeploy. Mainnet has all three adapters live.
 
 ### Source-protocol references
 
@@ -125,22 +101,24 @@ code can reconstruct hashes from onchain identifiers.
 | Flaunch | `keccak256(abi.encodePacked(flaunch, tokenId))` |
 | Uniswap V3 / Aerodrome / Pancake V3 | `keccak256(abi.encodePacked(positionManager, tokenId))` |
 | Uniswap V4 | `keccak256(abi.encodePacked(v4PositionManager, tokenId))` |
-| `ProtocolYieldAdapter` | One hash per deployment, registered manually against the Boardroom (HV) grid |
+| Push-only protocol-fee adapters | One hash per deployment, registered manually against the receiving grid |
 
 See [Asset hashes](../adapters/asset-hash.md) for the rules new adapters
 should follow.
 
 ## Keeping this page accurate
 
-Sources of truth:
+Sources of truth, in priority order:
 
-- App env files (`takeover-app/.env.mainnet`, `takeover-app/.env.sepolia`).
-- Deploy broadcast logs in [`takeoverapp/takeover-contracts/broadcast/`](https://github.com/takeoverapp/takeover-contracts/tree/main/broadcast).
+1. **SDK preset** ([`takeover-app/packages/sdk/src/networks/index.ts`](https://github.com/takeoverapp/takeover-app/blob/develop/packages/sdk/src/networks/index.ts)) — what the Builder portal and downstream apps read.
+2. App env files (`takeover-app/.env.mainnet`, `takeover-app/.env.sepolia`).
+3. Deploy broadcast logs in [`takeoverapp/takeover-contracts/broadcast/`](https://github.com/takeoverapp/takeover-contracts/tree/main/broadcast).
 
 When a new deploy script lands:
 
 1. Pull the new address from the broadcast JSON or the updated env file.
-2. Update the table above.
-3. Annotate any address being replaced as `revoked` (don't delete it —
+2. Update `packages/sdk/src/networks/index.ts` first.
+3. Update the tables on this page to match.
+4. Annotate any address being replaced as `revoked` (don't delete it —
    `withdrawAsset` from a revoked adapter is the documented unwind path).
-4. PR with `deployments` in the title.
+5. PR with `deployments` in the title.

@@ -1,13 +1,14 @@
-# Takeover yield-adapter pre-submission checklist
+# Takeover pre-submission checklist
 #
 # Machine-readable companion to submit/checklist.md. Designed so an AI
-# coding agent can iterate every item against a candidate adapter repo
-# and produce a structured pass/fail report before a human DM to
-# @takeoverfun on X.
+# coding agent can iterate every item against a candidate adapter,
+# hook module, or grid-launch flow and produce a structured pass/fail
+# report before a human DM to @takeoverfun on X.
 #
 # Schema:
 #   id           Stable identifier (used in reports and DMs).
-#   category     contract | tests | audit | operational | documentation
+#   category     contract | tests | audit | operational | documentation |
+#                hook | grid_launch
 #   severity     must | should
 #   description  Prose from the human checklist.
 #   verify       Structured hint for an automated checker:
@@ -19,11 +20,18 @@
 #   refs         Doc links the agent should cite if the check fails.
 #
 # Convention: an item passes when EVERY `verify` block passes.
+#
+# v2 schema additions:
+#   - `hook.*`         category for IGridHooksV23 modules.
+#   - `grid_launch.*`  category for grid creation flows
+#                      (atomic, chunked, multi-grid sharding).
+#   - `contract.collect_under_gas_cap` enforces the v2.3
+#     ADAPTER_COLLECT_GAS_CAP = 600_000 budget.
 
-version: 1
-schema: takeover-adapter-checklist/v1
-generated_for: UGM v2.1
-last_reviewed: 2026-04-27
+version: 2
+schema: takeover-checklist/v2
+generated_for: UGM v2.3
+last_reviewed: 2026-05-14
 
 items:
   # ─── Contract ────────────────────────────────────────────────────────
@@ -148,16 +156,18 @@ items:
     severity: must
     description: >-
       Deposit is gated on the grid creator, read freshly from
-      ugm.gridConfig(gridId).
+      ugm.gridConfigV22(gridId) (the v2.3 view that returns the same
+      fields v2.2's gridConfig did, kept under the V22 name for
+      indexer continuity).
     verify:
       - kind: grep
-        pattern: 'gridConfig\([^)]*\)|ugm\.gridConfig'
+        pattern: 'gridConfigV22\([^)]*\)|ugm\.gridConfigV22'
         glob: 'src/**/*.sol'
       - kind: manual
         question: >-
-          Does deposit() compare msg.sender to the creator field returned
-          by gridConfig, with NotGridCreator() (or equivalent) on
-          mismatch?
+          Does deposit() compare msg.sender to the creator field
+          returned by gridConfigV22, with NotGridCreator() (or
+          equivalent) on mismatch?
     refs:
       - adapters/lifecycle.md
 
@@ -198,8 +208,8 @@ items:
     severity: must
     description: >-
       Withdraw is gated. Default reference gate is "grid creator holds
-      all 100 seats". A different gate is acceptable but must be
-      documented on the example page.
+      all `grid.totalSeats`". A different gate is acceptable but must
+      be documented on the example page.
     verify:
       - kind: grep
         pattern: 'holderSeatCount|seatCount\(.*creator|allSeats|NotAllSeatsHeld'
@@ -286,6 +296,24 @@ items:
     refs:
       - adapters/security.md
       - adapters/interface.md
+
+  - id: contract.collect_under_gas_cap
+    category: contract
+    severity: must
+    description: >-
+      collectYield completes within ADAPTER_COLLECT_GAS_CAP = 600_000
+      gas for the worst-case asset count this adapter expects to
+      handle in production. Bound per-asset sub-loops; cache reads;
+      avoid storage writes that aren't strictly necessary.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the gas-bound argument: max assets per call, average
+          gas-per-asset measured under `forge test --gas-report`, and
+          the safety margin under 600_000.
+    refs:
+      - adapters/interface.md
+      - adapters/security.md
 
   # ─── Tests ───────────────────────────────────────────────────────────
   - id: tests.happy_path_deposit_claim
@@ -534,3 +562,254 @@ items:
           List any novel pattern and the cross-link.
     refs:
       - adapters/building-an-adapter.md
+
+  # ─── Hook modules (IGridHooksV23) ────────────────────────────────────
+  - id: hook.implements_igridhooksv23
+    category: hook
+    severity: must
+    description: >-
+      The module implements IGridHooksV23 (which extends
+      IGridGovernanceHooks). At minimum the v2.2 callback
+      `onSeatHolderChange` is implemented; v2.3 callbacks
+      (`beforeClaim`, `beforeBuyout`, `beforePriceChange`,
+      `onForfeit`, `yieldWeight`) are provided where the module's
+      semantics require them.
+    verify:
+      - kind: grep
+        pattern: 'is\s+IGridHooksV23|IGridGovernanceHooks'
+        glob: 'src/**/*.sol'
+      - kind: grep
+        pattern: 'function\s+onSeatHolderChange\('
+        glob: 'src/**/*.sol'
+    refs:
+      - hooks/interface.md
+
+  - id: hook.onseatholderchange_keys_by_gridid
+    category: hook
+    severity: must
+    description: >-
+      All per-seat module state is keyed by (gridId, seatId), not just
+      seatId. A single module instance must be safe to attach to
+      multiple grids without state leaking between them.
+    verify:
+      - kind: regex
+        pattern: 'mapping\(uint256\s*=>\s*mapping\(uint256\s*=>'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Identify any per-seat storage that is keyed by seatId only.
+          If found, justify why cross-grid bleed cannot happen, or
+          rekey by (gridId, seatId).
+    refs:
+      - hooks/examples/whitelist-module.md
+
+  - id: hook.beforeclaim_revert_blocks_acquisition
+    category: hook
+    severity: must
+    description: >-
+      A revert in `beforeClaim` blocks the acquisition. Tested with a
+      negative case (e.g. a non-allowlisted address attempting a
+      claim).
+    verify:
+      - kind: manual
+        question: Name the test and the custom error it reverts with.
+    refs:
+      - hooks/lifecycle.md
+
+  - id: hook.beforebuyout_revert_blocks_buyout
+    category: hook
+    severity: must
+    description: >-
+      A revert in `beforeBuyout` blocks the buyout. Tested with a
+      negative case.
+    verify:
+      - kind: manual
+        question: Name the test and the custom error it reverts with.
+    refs:
+      - hooks/lifecycle.md
+
+  - id: hook.onforfeit_never_reverts
+    category: hook
+    severity: must
+    description: >-
+      `onForfeit` never reverts under any input. UGM swallows reverts
+      from observers and emits `GovernanceHookSoftFail`; a reverting
+      observer is a bug.
+    verify:
+      - kind: manual
+        question: >-
+          Walk every branch of `onForfeit`. Confirm none can revert
+          (no require, no custom error, no division by zero, no
+          unbounded loops).
+    refs:
+      - hooks/lifecycle.md
+
+  - id: hook.yield_weight_within_gas_cap
+    category: hook
+    severity: must
+    description: >-
+      `yieldWeight` returns within GOVERNANCE_HOOK_GAS_CAP = 150_000
+      gas for the worst-case (gridId, seatId) input this module
+      expects. Verified via `forge test --gas-report`.
+    verify:
+      - kind: manual
+        question: >-
+          Paste the gas-report row for `yieldWeight`. Identify the
+          worst-case path and the safety margin under 150_000.
+    refs:
+      - hooks/interface.md
+      - hooks/lifecycle.md
+
+  - id: hook.no_state_writes_in_yield_weight
+    category: hook
+    severity: must
+    description: >-
+      `yieldWeight` is a pure view — no SSTORE on any branch. UGM
+      invokes it via staticcall; any write reverts and UGM falls back
+      to the equal-share `1/totalSeats` distribution.
+    verify:
+      - kind: grep
+        pattern: 'function\s+yieldWeight[^{]*\bview\b'
+        glob: 'src/**/*.sol'
+      - kind: manual
+        question: >-
+          Walk every branch of `yieldWeight`. Confirm no SSTORE,
+          no external call to a contract that itself writes, no
+          delegatecall.
+    refs:
+      - hooks/interface.md
+
+  - id: hook.module_transfer_seat_only_attached_module
+    category: hook
+    severity: should
+    description: >-
+      If the module calls `moduleTransferSeat`, it does so only when
+      it is also the attached governance module on that grid (i.e.
+      `ugm.gridGovernanceModule(gridId) == address(this)`). UGM
+      enforces this; the module should encode it explicitly so
+      tests can lock the invariant.
+    verify:
+      - kind: manual
+        question: >-
+          If applicable, name the module's wrapper around
+          `moduleTransferSeat` and the assertion guarding it.
+    refs:
+      - hooks/module-transfer-seat.md
+
+  - id: hook.module_transfer_seat_refund_modes
+    category: hook
+    severity: should
+    description: >-
+      If the module calls `moduleTransferSeat`, it documents which
+      `SeatTransferRefund` mode it uses (`None` or `Deposit`) and
+      under which conditions. The module never invents a `Price`
+      mode — phantom buyouts must route through `addBatch`.
+    verify:
+      - kind: manual
+        question: >-
+          Document the refund-mode policy. Cite the source location
+          where the mode is selected.
+    refs:
+      - hooks/module-transfer-seat.md
+
+  - id: hook.fork_test_e2e_v23
+    category: hook
+    severity: must
+    description: >-
+      At least one fork test exercises the module attached to a real
+      v2.3 UGM (mainnet or Sepolia per reference/deployments.md).
+      The test runs a full seat lifecycle (claim → setPrice →
+      buyout / forfeit) with the module installed.
+    verify:
+      - kind: manual
+        question: >-
+          Name the fork test and the block number / fork URL it
+          pins.
+    refs:
+      - reference/deployments.md
+      - hooks/lifecycle.md
+
+  - id: hook.descriptor_present
+    category: hook
+    severity: should
+    description: >-
+      Module implements `IHookDescriptor` so frontends and the
+      `/builders/contracts` page can surface its kind, version, and
+      supported callbacks without reading source.
+    verify:
+      - kind: grep
+        pattern: 'is\s+IHookDescriptor|hookKind\(\)|supportedCallbacks\(\)'
+        glob: 'src/**/*.sol'
+    refs:
+      - hooks/interface.md
+
+  # ─── Grid launch flows ──────────────────────────────────────────────
+  - id: grid_launch.path_chosen_by_total_seats
+    category: grid_launch
+    severity: must
+    description: >-
+      The launch flow chooses the right creation path purely from
+      `totalSeats`: ≤1024 → atomic `createGrid`; 1025–4096 → chunked
+      `createGridShell` + `appendInitialPricingChunk`; >4096 →
+      SDK-side multi-grid sharding.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the branch (or test) that picks the path. Show that
+          a request for >1024 seats does NOT call `createGrid`.
+    refs:
+      - skills/launch-grid.md
+      - boards/sharding.md
+
+  - id: grid_launch.params_within_validation_bounds
+    category: grid_launch
+    severity: must
+    description: >-
+      All `CreateGridParams` / `CreateGridShellParams` fields land
+      inside the contract's validation bounds: `taxRateBps` 0 or
+      [100, 1000]; `totalSeats` [4, 4096]; `forfeitureDuration` 0
+      or ≤ 30 days; `taxToken` is on the guardian's allowlist;
+      `initialPrices.length == totalSeats` on the atomic path.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the validation site. If validation runs only at the
+          contract boundary, cite the test that exercises every
+          revert (e.g. `TotalSeatsOutOfBounds`,
+          `InitialPricesLengthMismatch`).
+    refs:
+      - boards/creating-a-grid.md
+      - skills/launch-grid.md
+
+  - id: grid_launch.chunked_completes_pricing
+    category: grid_launch
+    severity: must
+    description: >-
+      For chunked launches, the flow waits for
+      `GridInitialPricingComplete(gridId)` before any seat-economic
+      op. UGM reverts seat acquires with `InitialPricingIncomplete()`
+      until every chunk has landed.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the wait / decode path. If applicable, name the test
+          that asserts `claim` reverts with
+          `InitialPricingIncomplete()` while pricing is partial.
+    refs:
+      - boards/sharding.md
+
+  - id: grid_launch.shard_count_is_explicit
+    category: grid_launch
+    severity: should
+    description: >-
+      For multi-grid sharding (>4096 seats), the SDK config makes the
+      shard count explicit (no silent clipping to 4096). Each shard
+      is created independently and tracked in `GridRef[]`.
+    verify:
+      - kind: manual
+        question: >-
+          Cite the shard-count derivation and the corresponding
+          `GridRef[]` produced for the SDK.
+    refs:
+      - boards/sharding.md
+

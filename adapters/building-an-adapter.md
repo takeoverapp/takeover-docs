@@ -1,4 +1,4 @@
-# 🛠 Building a yield adapter
+# Building a yield adapter
 
 This is the load-bearing page. By the end of it you'll have the shape of a
 contract that:
@@ -11,6 +11,16 @@ contract that:
 
 Everything below assumes you've read [The yield adapter model](../overview/yield-adapter-model.md).
 If you haven't, start there — the rest of this page won't make sense.
+
+> **Target version: UGM v2.3.** New adapters point their constructor at
+> the v2.3 UGM (mainnet `0xac02F47a3E4451f96c715313C8894c3041413F3A`,
+> Sepolia `0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`). UGM v2.3
+> caps every `collectYield` call at
+> `ADAPTER_COLLECT_GAS_CAP = 600,000` gas — exceeding the budget makes
+> UGM silently skip the adapter for that invocation, so internal
+> per-asset loops MUST stay inside it. See
+> [Deployments](../reference/deployments.md) and
+> [adapters/security.md](security.md) for the full implications.
 
 ## Step 0: pick the simplest reference adapter that matches your shape
 
@@ -80,11 +90,14 @@ invariants UGM enforces.
 
 ## Step 3: scaffold the contract
 
-> **Which UGM do I point at?** New adapters should target **UGM v2.1**.
+> **Which UGM do I point at?** Always **UGM v2.3** for new adapters.
 > See [Deployments](../reference/deployments.md) for the chain-specific
-> address. The reference adapters (`FlaunchYieldAdapter`, `V3YieldAdapter`,
-> `V4YieldAdapter`) currently sit on the older v2 UGM — their patterns are
-> still right, you just swap the constructor address.
+> address. v2.3 keeps the same `gridConfig()` 6-tuple as v2.2
+> (`creator, createdAt, totalSeats, taxRateBps, taxToken, yieldToken`),
+> so adapter patterns port directly — only the constructor address
+> changes. v2.3 adds an auxiliary `gridConfigV22()` view returning
+> `(forfeitureDuration, seatsMaterialized, seatsSold, graduated)` for
+> indexers; adapters typically don't need it.
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -227,7 +240,7 @@ function _collectSingle(bytes32 assetHash) internal {
 }
 ```
 
-Five things to keep in mind:
+Six things to keep in mind:
 
 1. **`msg.sender` check is mandatory.** Anyone calling this directly would
    either get an irrelevant pull, or — worse — drain pre-positioned token
@@ -241,6 +254,12 @@ Five things to keep in mind:
    resets first.
 5. **Don't emit on no-op paths.** The indexer treats `YieldClaimed` as a
    real event. Empty events spam dashboards.
+6. **Stay under the gas cap.** `collectYield` runs inside
+   `ADAPTER_COLLECT_GAS_CAP = 600,000` gas on UGM v2.3. Bound your
+   per-asset sub-loops; cache reads (e.g. `gridConfig` once per
+   batch); avoid storage writes that aren't strictly necessary.
+   Profile under `forge test --gas-report` and add a fork test
+   asserting the worst-case batch fits.
 
 ## Step 6: implement `pendingYield`
 

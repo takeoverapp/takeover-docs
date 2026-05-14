@@ -2,9 +2,10 @@
 
 > **Tier 2 placeholder.** Full annotated walkthrough of the V4 adapter.
 >
-> **Status:** the live deployment targets **UGM v2** today. See
-> [Deployments](../../reference/deployments.md). Pattern carries over to
-> v2.1; only the constructor's UGM address changes.
+> **Live v2.3 mainnet deployment:**
+> [`0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af`](https://basescan.org/address/0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af).
+> See [Deployments](../../reference/deployments.md) for current
+> per-network status (Sepolia v2.3 adapters not yet redeployed).
 
 ## Pattern: V4 modifyLiquidities + IPoolSwap
 

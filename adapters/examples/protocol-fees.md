@@ -3,9 +3,10 @@
 > **Tier 2 placeholder.** Full annotated walkthrough of the protocol-fee
 > push-only adapter.
 >
-> **Status:** this is the only adapter currently registered on **UGM v2.1**
-> (it feeds the Boardroom / hvTAKEOVER grid with USDC protocol fees pulled
-> from v2 UGMs and v1 TSFM pools). See [Deployments](../../reference/deployments.md).
+> The pattern is what's important here — `ProtocolYieldAdapter` is the
+> canonical **push-only** template every protocol-fee-routing adapter
+> can fork. New deployments should target UGM v2.3 (see
+> [Deployments](../../reference/deployments.md)).
 
 ## Pattern: push-only, `collectYield` is a no-op
 

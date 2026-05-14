@@ -2,9 +2,10 @@
 
 > **Tier 2 placeholder.** Full annotated walkthrough of the V3 adapter.
 >
-> **Status:** the live deployment targets **UGM v2** today. See
-> [Deployments](../../reference/deployments.md). Pattern carries over to
-> v2.1; only the constructor's UGM address changes.
+> **Live v2.3 mainnet deployment:**
+> [`0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9`](https://basescan.org/address/0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9).
+> See [Deployments](../../reference/deployments.md) for current
+> per-network status (Sepolia v2.3 adapters not yet redeployed).
 
 ## Pattern: two-token swap-and-forward
 

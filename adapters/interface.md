@@ -20,8 +20,11 @@ is up to you. UGM only ever calls the two functions above.
 > from the source and push it back to me. I'll be calling this from inside my
 > own reentrancy lock."
 
-**Caller:** UGM v2.1 only. Implementations must revert (or no-op) if `msg.sender`
-isn't UGM.
+**Caller:** UGM v2.3 only. Implementations must revert (or no-op) if `msg.sender`
+isn't UGM. UGM v2.3 invokes `collectYield` inside a 600,000-gas budget
+(`ADAPTER_COLLECT_GAS_CAP`) — overrunning that budget makes UGM silently
+skip the adapter for that `claimFees` call, so per-asset loops MUST stay
+within it.
 
 ```solidity
 if (msg.sender != address(ugm)) revert NotUGM();

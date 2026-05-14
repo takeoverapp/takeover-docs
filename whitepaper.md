@@ -1,14 +1,17 @@
 # 📜 Takeover: A Perpetually Contestable Market for Fee Rights
 
 > **Note for developers.** This whitepaper describes the *protocol design*.
-> For the current production implementation — UGM v2.1, the
-> `IYieldAdapter` standard, the live adapter set, and addresses — read
-> alongside [What is Takeover](overview/what-is-takeover.md), [The yield
-> adapter model](overview/yield-adapter-model.md), and [Deployments](reference/deployments.md).
-> The "Implementation status" appendix at the bottom of this page tracks
-> drift between the design and the deployed contracts.
+> For the current production implementation — UGM v2.3, the
+> `IYieldAdapter` and `IGridHooksV23` interfaces, the live adapter set,
+> and addresses — read alongside
+> [What is Takeover](overview/what-is-takeover.md),
+> [The yield adapter model](overview/yield-adapter-model.md),
+> [The hook model](overview/hook-model.md),
+> and [Deployments](reference/deployments.md). The "Implementation
+> status" appendix at the bottom of this page tracks drift between the
+> design and the deployed contracts.
 
-**Abstract.** Takeover introduces a mechanism for allocating onchain trading fee distribution rights through continuously contestable ownership. Each liquidity pool's fee output is partitioned into 100 positions ("seats"). Seat holders publicly declare a price for their seat and pay a continuous tax proportional to that price. Any participant may acquire any seat at its declared price — the holder cannot refuse. This creates a system where fee rights are always priced, always acquirable, and always contested. No order books, no market makers, no waiting for a counterparty. Just a price, a tax, and the constant threat that someone else wants your seat more than you do.
+**Abstract.** Takeover introduces a mechanism for allocating onchain trading fee distribution rights through continuously contestable ownership. Each liquidity pool's fee output is partitioned into a configurable number of positions ("seats"). Seat holders publicly declare a price for their seat and pay a continuous tax proportional to that price. Any participant may acquire any seat at its declared price — the holder cannot refuse. This creates a system where fee rights are always priced, always acquirable, and always contested. No order books, no market makers, no waiting for a counterparty. Just a price, a tax, and the constant threat that someone else wants your seat more than you do.
 
 ---
 
@@ -25,7 +28,7 @@ Seat ownership is governed by a **Harberger property system**: holders must publ
 **Price too low?** Someone takes your seat and your fee stream with it.
 **Price too high?** The tax drains your deposit and you lose the seat anyway.
 
-The only sustainable strategy is honest pricing — declaring a value that accurately reflects what the fee stream is worth to you. Across 100 seats per pool, these individual assessments aggregate into a continuously updated, mechanism-driven valuation of the pool's fee-generating capacity.
+The only sustainable strategy is honest pricing — declaring a value that accurately reflects what the fee stream is worth to you. Across all seats in a pool, these individual assessments aggregate into a continuously updated, mechanism-driven valuation of the pool's fee-generating capacity.
 
 The result is not a passive financial instrument. It is a competitive, perpetually contested allocation system where participants must actively price, defend, and manage their positions — or lose them.
 
@@ -33,7 +36,7 @@ The result is not a passive financial instrument. It is a competitive, perpetual
 
 Takeover combines three mechanisms into a single primitive:
 
-1. **Fee Partitioning** — a pool's fee output is divided into 100 independently-owned seats.
+1. **Fee Partitioning** — a pool's fee output is divided into a configurable number of independently-owned seats (currently bounded `[4, 4096]` per grid; see §6.1).
 2. **Self-Assessed Ownership** — seat holders set their own price, and any participant may acquire the seat at that price.
 3. **Continuous Taxation** — a tax proportional to the declared value discourages excessive valuation and maintains contestability.
 
@@ -45,7 +48,7 @@ Together, these create a system in which ownership of fee distribution rights is
 
 ### 2.1 Seats and Fee Partitioning
 
-When a liquidity pool is registered with Takeover, its fee output is divided into **100 seats**, indexed 0–99. Each seat entitles its holder to **1% of the pool's fee distributions** while they maintain the position.
+When a liquidity pool is registered with Takeover, its fee output is divided into a creator-chosen number of **seats**, bounded in `[MIN_TOTAL_SEATS, MAX_TOTAL_SEATS] = [4, 4096]`. Each seat entitles its holder to a fixed share of the pool's fee distributions while they maintain the position; under the default equal-share allocation that share is `1/totalSeats` per seat.
 
 Seats are not tokens. They are non-transferable positions within the Takeover contract — a holder cannot list a seat on an exchange, wrap it in another protocol, or transfer it peer-to-peer. Ownership changes occur exclusively through the Harberger mechanism described below. This is a deliberate constraint: it ensures that all seat transfers happen under the same pricing and taxation rules, and that the contestability properties of the system cannot be circumvented.
 
@@ -138,7 +141,7 @@ This asymmetry has a behavioral consequence: rational holders will tend to sligh
 
 ### 3.3 Aggregate Price Discovery
 
-Across 100 seats in a pool, the aggregate of all declared prices represents the participants' collective assessment of the pool's fee-generating capacity. Each seat price encodes an individual expectation about the pool's future activity, and the sum of these prices produces a continuously updated, mechanism-driven signal.
+Across every seat in a pool, the aggregate of all declared prices represents the participants' collective assessment of the pool's fee-generating capacity. Each seat price encodes an individual expectation about the pool's future activity, and the sum of these prices produces a continuously updated, mechanism-driven signal.
 
 This signal emerges without any explicit forecasting instrument. Participants are simply pricing their own positions under competitive pressure, and the aggregate reveals information that no individual participant is trying to produce.
 
@@ -257,7 +260,7 @@ approval. See [Adapter approval process](submit/adapter-approval-process.md).
 
 ### 6.3 Immutability and Versions
 
-Each UGM is deployed as an immutable contract with no proxy upgrade mechanism. If a new version is needed, a new UGM is deployed and users migrate via migration zaps. As of April 2026 the live versions are **UGM v2** (hosting most production grids today) and **UGM v2.1** (hosting the Boardroom; the target for new adapter integrations).
+Each UGM is deployed as an immutable contract with no proxy upgrade mechanism. If a new version is needed, a new UGM is deployed and users migrate via migration zaps. The live integration target is **UGM v2.3** on Base mainnet and Base Sepolia; older versions remain readable on-chain for historical grids.
 
 A single **guardian** role exists for emergency operations (pausing grids, rescuing stuck tokens), fee parameter tuning within bounds, and adapter approval (`setApprovedAdapter`). The guardian cannot modify core Harberger mechanics.
 
@@ -267,10 +270,10 @@ A single **guardian** role exists for emergency operations (pausing grids, rescu
 
 The grid creator — the address that launched the grid and registered the underlying assets — holds a distinct role in the system:
 
-1. **Creator-owned seats.** At grid creation, the creator owns all 100 seats with independently set prices. Creator-held seats are **tax-exempt** and earn yield proportionally.
+1. **Creator-owned seats.** At grid creation, the creator owns every seat (`totalSeats`, configurable in `[4, 4096]`) with independently set prices. Creator-held seats are **tax-exempt** and earn yield proportionally.
 2. **Immediate Harberger.** When a user buys a seat from the creator, the buyer sets their own price and enters full Harberger mechanics immediately — earns yield, pays tax, can be bought out. There is no separate "pre-market" phase.
 3. **Tax revenue.** The creator receives a share of all Harberger tax revenue from their grid, routed through the `GenericBuybackKeeper` — which either swaps tax tokens for a creator-specified target token or forwards them directly to the creator's address. Seat holders trigger these transfers as keepers, earning a small reward.
-4. **Full withdrawal.** If the creator reacquires all 100 seats, they may withdraw the underlying assets from the grid.
+4. **Full withdrawal.** If the creator reacquires every seat on the grid, they may withdraw the underlying assets from the grid.
 
 ---
 
@@ -303,7 +306,7 @@ Takeover does not ask participants to analyze curves, model term structures, or 
 
 ---
 
-## Appendix A. Implementation status (April 2026)
+## Appendix A. Implementation status (May 2026)
 
 This section tracks divergence between the design described above and the
 deployed contracts. It is the part of this document most likely to drift —
@@ -311,13 +314,15 @@ when in doubt, [Deployments](reference/deployments.md) wins.
 
 | Concept (whitepaper section) | Implementation today |
 |---|---|
-| Unified Grid Manager (§6.1, §6.3) | Two live versions: **UGM v2** (most production grids) and **UGM v2.1** (Boardroom; target for new integrations) |
-| Yield source onboarding (§6.1, §6.2) | Adapter contracts implementing [`IYieldAdapter`](adapters/interface.md), guardian-approved via `setApprovedAdapter` |
-| Adapter set (§6.2) | `FlaunchYieldAdapter`, `V3YieldAdapter`, `V4YieldAdapter` (on UGM v2); `ProtocolYieldAdapter` (on UGM v2.1) |
+| Unified Grid Manager (§6.1, §6.3) | **UGM v2.3** live on Base mainnet and Base Sepolia (`UnifiedGridManagerV23` + linked `UGMV23Linked` library) |
+| Yield source onboarding (§6.1, §6.2) | Adapter contracts implementing [`IYieldAdapter`](adapters/interface.md), guardian-approved via `setApprovedAdapter`. Per-call gas budget: `ADAPTER_COLLECT_GAS_CAP = 600,000`. |
+| Adapter set (§6.2) | `FlaunchYieldAdapter`, `V3YieldAdapter`, `V4YieldAdapter` (mainnet, on UGM v2.3); Sepolia adapter trio not yet redeployed against v2.3 |
+| Hook modules (new) | UGM v2.3 ships [`IGridHooksV23`](hooks/interface.md), a strict superset of v2.2's `IGridGovernanceHooks`, used by games / DAO tooling / prediction markets to gate seat economics. Per-call gas budget: `GOVERNANCE_HOOK_GAS_CAP = 150,000`. |
 | Tax token denomination (§2.2, §2.2.3) | Per-grid; configured at grid creation, must be guardian-allowlisted |
 | Yield token denomination (§2.1) | Per-grid; ETH/flETH/WETH or any ERC20, set at grid creation and immutable |
-| Guardian role (§6.3) | Multisig today; controls emergency ops, fee parameter bounds, and `setApprovedAdapter` |
-| Migration between UGM versions | `MigrationZap` contracts (v1→v2 today; v2→v2.1 path forthcoming) |
+| Seat counts (§2.1) | Configurable per grid in `[4, 4096]`. Atomic creation up to 1024; chunked creation (`createGridShell` + `appendInitialPricingChunk`) above that. See [boards/sharding.md](boards/sharding.md). |
+| Guardian role (§6.3) | Multisig today; controls emergency ops, fee parameter bounds, two-axis pause (`pauseGrid` + `pauseGridModules`), and `setApprovedAdapter` / `setApprovedGovernanceModule` / `setApprovedModule` allowlists. |
+| Migration between UGM versions | `MigrationZap` contracts (historical v1→v2; v2→v2.3 paths supported) |
 
 ---
 

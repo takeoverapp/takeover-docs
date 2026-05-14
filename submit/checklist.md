@@ -1,26 +1,31 @@
-# ✅ Pre-submission checklist
+# Pre-submission checklist
 
-Before requesting [guardian approval](adapter-approval-process.md) for a new
-yield adapter, walk this list. Anything missing here is going to come back as
-a review comment.
+Before requesting [guardian approval](adapter-approval-process.md) for a
+new yield adapter or hook module, walk this list. Anything missing here
+is going to come back as a review comment.
 
 > **Building with an AI agent?** Every item here also lives in
 > [`submit/checklist.yml`](checklist.yml) with a structured `verify` hint
 > per item (ripgrep patterns, named tests, manual questions). Point your
 > agent at the YAML and ask it to produce a pass/fail row per `id`, then
 > paste the result into your DM to [@takeoverfun](https://x.com/takeoverfun)
-> alongside the prose responses. See [`SKILL.md`](../SKILL.md) for the full
-> agent workflow.
+> alongside the prose responses. See the
+> [Agent skills](../skills/README.md) section for the full workflow.
 
-## Contract
+## If you're shipping a yield adapter
+
+### Contract
 
 - [ ] Implements [`IYieldAdapter`](../adapters/interface.md): `collectYield`
       and `pendingYield`.
+- [ ] Constructor points at **UGM v2.3** for the target network.
 - [ ] `collectYield` reverts if `msg.sender != address(ugm)`.
 - [ ] `collectYield` is **idempotent**: two calls in a row with no source-
       side activity move zero tokens.
 - [ ] `collectYield` is **best-effort per asset**: a problem with one asset
       doesn't revert the whole batch.
+- [ ] `collectYield` stays under `ADAPTER_COLLECT_GAS_CAP = 600,000`.
+      Profiled with a worst-case fork test.
 - [ ] `pendingYield` is a pure read; never reverts on missing/zero state.
 - [ ] Yield is forwarded in the **grid's `yieldToken`** units. ETH-yield
       grids accept flETH, WETH, or raw ETH; ERC20-yield grids accept only
@@ -43,7 +48,7 @@ a review comment.
       are `nonReentrant`. `collectYield` is **not** `nonReentrant` — UGM
       already holds its lock on that path.
 
-## Tests
+### Tests
 
 - [ ] Happy-path deposit + `claimFees` → seat balance moves.
 - [ ] Idempotent collect: second `claimFees` in a row collects zero.
@@ -51,6 +56,8 @@ a review comment.
 - [ ] `collectYield` from a non-UGM caller reverts.
 - [ ] Deposit on a grid with incompatible `yieldToken` reverts.
 - [ ] Withdraw without all seats reverts; with all seats succeeds.
+- [ ] **Gas budget test:** `collectYield` over a worst-case batch runs
+      under 600k gas.
 - [ ] Approval revoke path: after `setApprovedAdapter(adapter, false)`,
       deposit reverts but residual yield still pushes and `withdrawAsset`
       still works for already-registered assets.
@@ -58,36 +65,88 @@ a review comment.
       very high `sqrtPriceX96`).
 - [ ] Foundry coverage report runs cleanly. Branch coverage on
       `collectYield` and any conversion helpers should be near 100%.
-- [ ] At least one **fork test** against the real source protocol on Base or
-      Base Sepolia.
+- [ ] At least one **fork test** against the real source protocol on Base
+      or Base Sepolia.
 
-## Audit
+## If you're shipping a hook module
 
-- [ ] External audit complete. Auditor and report attached to the approval
-      request.
+### Contract
+
+- [ ] Implements [`IGridHooksV23`](../hooks/interface.md) — or, if you only
+      need the v2.2 surface, `IGridGovernanceHooks` (UGM v2.3 will accept
+      either).
+- [ ] Every callback that participates in policy returns within
+      `GOVERNANCE_HOOK_GAS_CAP = 150,000` gas, including the worst-case
+      cold-cache path.
+- [ ] Gating callbacks (`beforeClaim`, `beforeBuyout`, `beforePriceChange`)
+      revert with a custom error or string. **No bare `revert()`** — UGM
+      treats empty revert data as "didn't implement" and silently no-ops.
+- [ ] Observer callbacks (`onForfeit`, `yieldWeight`) tolerate UGM
+      swallowing reverts: any state change inside them must be either
+      idempotent or skipped under failure.
+- [ ] State is keyed by `(gridId, seatId)` (or `gridId` alone where
+      appropriate) so a single module instance can serve multiple grids
+      without bleed-over.
+- [ ] If the module also calls `moduleTransferSeat`, it documents the
+      authorisation flow it uses to determine when forced transfers are
+      legitimate.
+- [ ] Owner-only admin functions are gated; module bookkeeping events are
+      emitted on every state change.
+- [ ] No unbounded loops in callbacks. Iteration over seats / holders is
+      a soft-fail risk under heavy grids.
+- [ ] `IHookDescriptor` is implemented (`hookKind`, `hookVersion`,
+      `supportedCallbacks`, `description`) so builder UIs can render
+      accurate metadata.
+
+### Tests
+
+- [ ] Happy-path: gated buyout / claim / price change reverts when policy
+      forbids; passes when allowed.
+- [ ] Multi-grid invariant: same module instance attached to two grids,
+      state changes on grid A don't bleed into grid B.
+- [ ] Gas budget: each callback under 150k gas in worst-case cold-cache
+      conditions.
+- [ ] Empty-revert avoidance: `beforeClaim` etc. always revert with data
+      when blocking. Confirm with a foundry test asserting `vm.expectRevert(SomeError.selector)`.
+- [ ] Forfeit observer: `onForfeit` does not revert in any forge fork
+      test of the forfeit path.
+- [ ] If the module calls `moduleTransferSeat`: cooldown-pause fork tests
+      asserting `pauseGridModules`, `setModuleDisabled`, and
+      `setApprovedModule(false)` each individually block forced transfers.
+
+## Audit (both paths)
+
+- [ ] External audit complete. Auditor and report attached to the
+      approval request.
 - [ ] All critical/high findings resolved or accepted-with-justification.
-- [ ] If you used [Slither](https://github.com/crytic/slither), the run is
-      clean (or the suppressions are documented).
+- [ ] If you used [Slither](https://github.com/crytic/slither) and/or
+      [Semgrep](https://semgrep.dev), the runs are clean (or the
+      suppressions are documented).
 
-## Operational
+## Operational (both paths)
 
-- [ ] Adapter deployment script is reproducible (CREATE2 salt or
-      forge-script with `--slow` and an env-var-driven config). See
+- [ ] Deployment script is reproducible (CREATE2 salt or forge-script
+      with `--slow` and an env-var-driven config). See
       `script/13_DeployAdapters.s.sol` in `takeover-contracts` for the
-      reference shape.
-- [ ] Adapter address is the same on every chain you intend to support
-      (CREATE2). Not strictly required, but expected.
-- [ ] You can produce a 1-line "what does this adapter do" sentence and a
-      5-line "how the source produces yield" paragraph for the
-      [example page](../adapters/examples/flaunch.md).
-- [ ] You have a wallet/key story for the adapter's `Ownable` role —
+      adapter reference shape.
+- [ ] You can produce a 1-line "what does this contract do" sentence and
+      a 5-line description for the example page.
+- [ ] You have a wallet/key story for the contract's `Ownable` role —
       multisig preferred for anything in production.
 
-## Documentation
+## Documentation (both paths)
 
-- [ ] Example walkthrough written: copy `adapters/examples/flaunch.md`,
-      replace the contract-specific bits, add to `SUMMARY.md`.
-- [ ] Any new pattern (push-only, multi-source, novel asset-hash convention)
-      cross-linked from `adapters/building-an-adapter.md`.
+- [ ] Example walkthrough written: for adapters, copy
+      [`adapters/examples/flaunch.md`](../adapters/examples/flaunch.md);
+      for hooks, copy
+      [`hooks/examples/whitelist-module.md`](../hooks/examples/whitelist-module.md).
+      Replace contract-specific bits and add to `SUMMARY.md`.
+- [ ] Any new pattern (push-only, multi-source, novel asset-hash, novel
+      hook surface) cross-linked from the relevant
+      `adapters/building-an-adapter.md` or
+      `hooks/build-hook-module.md`.
 
-When all of the above is green, file the [approval request](adapter-approval-process.md).
+When all of the above is green, file the
+[approval request](adapter-approval-process.md). For hook modules, the
+same approval flow applies — DM the team with the audit report and the
+filled-in checklist.yml output.

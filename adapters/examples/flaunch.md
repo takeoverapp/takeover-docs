@@ -4,10 +4,11 @@ The simplest reference adapter, and a good first read.
 
 > Source: [`takeoverapp/takeover-contracts/src/FlaunchYieldAdapter.sol`](https://github.com/takeoverapp/takeover-contracts/blob/main/src/FlaunchYieldAdapter.sol).
 >
-> **Status:** the live deployments of this adapter are registered against
-> **UGM v2** today, not v2.1 — see [Deployments](../../reference/deployments.md).
-> The pattern below is correct for a v2.1 adapter; a fork only needs the
-> constructor's UGM address swapped.
+> **Live v2.3 mainnet deployment:**
+> [`0x2c242993A6959D9eF8e065C089054206e385245e`](https://basescan.org/address/0x2c242993A6959D9eF8e065C089054206e385245e).
+> Sepolia v2.3 trio is pending the next adapter redeploy — the
+> [Deployments](../../reference/deployments.md) page tracks the
+> current state per network.
 
 ## What it does
 

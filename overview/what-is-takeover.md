@@ -26,7 +26,7 @@ interchangeably in these docs:
   "the USDC board", etc.).
 
 Every board today is hosted on a single contract: the **Unified Grid Manager
-v2.1** (UGM v2.1). One contract, many grids — each grid is a row in UGM's
+v2.3** (UGM v2.3). One contract, many grids — each grid is a row in UGM's
 storage.
 
 ## Why this matters for integrators

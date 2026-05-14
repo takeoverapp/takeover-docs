@@ -1,7 +1,7 @@
 # Yield token rules
 
 > **Tier 2 placeholder.** Detailed accept matrix for `receiveYieldETH` and
-> `receiveYieldERC20` on UGM v2.1.
+> `receiveYieldERC20` on UGM v2.3.
 
 ## Today's quick reference
 
@@ -10,7 +10,7 @@
 | `address(0)` (ETH) | raw ETH (`msg.value == amount`) | flETH or WETH only |
 | any ERC20 | reverts (`WrongYieldToken`) | exactly that ERC20 |
 
-Reference (UGM v2.1):
+Reference (UGM v2.3):
 
 - `receiveYieldETH` requires `_grids[gridId].yieldToken == address(0)` and
   `msg.value == amount`.
