@@ -12,10 +12,10 @@ The single source of truth for these addresses is the SDK preset:
 ```ts
 import { base, sepolia } from '@takeover/sdk';
 
-base.ugmV23;            // 0xac02F47a3E4451f96c715313C8894c3041413F3A
-base.library;           // 0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E
-base.yieldAdapters.v3;  // 0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9
-sepolia.ugmV23;         // 0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C
+base.ugmV23;            // 0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e
+base.library;           // 0x2b4530d49ccCBdF22005d84C175F552334a61445
+base.yieldAdapters.v3;  // 0x0205dA82768Ecd4C6E66f94e5A97F63B8dE1EbCf
+sepolia.ugmV23;         // 0xC389D001C627C7fcE23405190d453906598c1607
 ```
 
 The Builder portal `/builders/contracts` page reads from the same preset
@@ -27,11 +27,11 @@ and is interactively switchable between mainnet and Sepolia.
 
 | Contract | Address |
 |---|---|
-| `UnifiedGridManagerV23` | [`0xac02F47a3E4451f96c715313C8894c3041413F3A`](https://basescan.org/address/0xac02F47a3E4451f96c715313C8894c3041413F3A) |
-| `UGMV23Linked` (linked library) | [`0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E`](https://basescan.org/address/0x49c3B2Ec13228d349A1cADB7DDFdd05aeD51977E) |
-| `FlaunchYieldAdapter` (v2.3) | [`0x2c242993A6959D9eF8e065C089054206e385245e`](https://basescan.org/address/0x2c242993A6959D9eF8e065C089054206e385245e) |
-| `V3YieldAdapter` (v2.3) | [`0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9`](https://basescan.org/address/0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9) |
-| `V4YieldAdapter` (v2.3) | [`0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af`](https://basescan.org/address/0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af) |
+| `UnifiedGridManagerV23` | [`0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e`](https://basescan.org/address/0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e) |
+| `UGMV23Linked` (linked library) | [`0x2b4530d49ccCBdF22005d84C175F552334a61445`](https://basescan.org/address/0x2b4530d49ccCBdF22005d84C175F552334a61445) |
+| `FlaunchYieldAdapter` (v2.3) | [`0x1867650664c252186a214D5ed37CB1FD736b7bE6`](https://basescan.org/address/0x1867650664c252186a214D5ed37CB1FD736b7bE6) |
+| `V3YieldAdapter` (v2.3) | [`0x0205dA82768Ecd4C6E66f94e5A97F63B8dE1EbCf`](https://basescan.org/address/0x0205dA82768Ecd4C6E66f94e5A97F63B8dE1EbCf) |
+| `V4YieldAdapter` (v2.3) | [`0x06e31B4EfCCdb8450a2e29C590A4AF81843d3172`](https://basescan.org/address/0x06e31B4EfCCdb8450a2e29C590A4AF81843d3172) |
 | Guardian | [`0x6b9Db1337B37426a7911e4108d27D44393B95eec`](https://basescan.org/address/0x6b9Db1337B37426a7911e4108d27D44393B95eec) |
 
 The `UGMV23Linked` library is `DELEGATECALL`'d from
@@ -62,19 +62,18 @@ Additional Flaunch NFT deployments the indexer tracks: `0xb4512bf57d50fbcb64a3ad
 
 | Contract | Address |
 |---|---|
-| `UnifiedGridManagerV23` | [`0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`](https://sepolia.basescan.org/address/0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C) |
-| `UGMV23Linked` (linked library) | [`0x989cfDE8a2D85e913446E782F73Aaa5Ab226eCb1`](https://sepolia.basescan.org/address/0x989cfDE8a2D85e913446E782F73Aaa5Ab226eCb1) |
-| `FlaunchYieldAdapter` (v2.3) | _pending — not yet deployed_ |
-| `V3YieldAdapter` (v2.3) | _pending — not yet deployed_ |
-| `V4YieldAdapter` (v2.3) | _pending — not yet deployed_ |
-| Guardian | [`0x0646441c3eC556c1994420C3F9B0f31279BEfb6e`](https://sepolia.basescan.org/address/0x0646441c3eC556c1994420C3F9B0f31279BEfb6e) |
+| `UnifiedGridManagerV23` | [`0xC389D001C627C7fcE23405190d453906598c1607`](https://sepolia.basescan.org/address/0xC389D001C627C7fcE23405190d453906598c1607) |
+| `UGMV23Linked` (linked library) | [`0xb92EbB9fEbcf09F534B75bD312a66e1C8c918562`](https://sepolia.basescan.org/address/0xb92EbB9fEbcf09F534B75bD312a66e1C8c918562) |
+| `FlaunchYieldAdapter` (v2.3) | [`0x444f97f0db32fa12e3c444b9f83b4b51f2767f59`](https://sepolia.basescan.org/address/0x444f97f0db32fa12e3c444b9f83b4b51f2767f59) |
+| `V3YieldAdapter` (v2.3) | [`0x0f8387cd6ecad2618a3255baf8ec84a803b2efdb`](https://sepolia.basescan.org/address/0x0f8387cd6ecad2618a3255baf8ec84a803b2efdb) |
+| `V4YieldAdapter` (v2.3) | [`0xAd97b449277de911d740026087547c582AA1FB59`](https://sepolia.basescan.org/address/0xAd97b449277de911d740026087547c582AA1FB59) |
+| Guardian | [`0x6b9Db1337B37426a7911e4108d27D44393B95eec`](https://sepolia.basescan.org/address/0x6b9Db1337B37426a7911e4108d27D44393B95eec) |
 
-> **Sepolia adapters not yet deployed.** UGM v2.3 + library are live on
-> Sepolia for builders to integrate against, but the v2.3 adapter trio
-> hasn't been redeployed onto Sepolia yet. Builders testing yield flows
-> on Sepolia today need to write against UGM directly (deposit asset,
-> push yield via `receiveYieldERC20` / `receiveYieldETH`) or wait for
-> the redeploy. Mainnet has all three adapters live.
+> **Sepolia is now address-aligned with mainnet.** The May 2026 refactor
+> redeploy (salt `-V3`) sits at a fresh CREATE2 address, the linked
+> library is deployed alongside it, and all three yield adapters are
+> approved on the v2.3 UGM. Sepolia and Base mainnet now share a single
+> guardian (`0x6b9Db1337B…5eec`) so the same key wires both networks.
 
 ### Source-protocol references
 

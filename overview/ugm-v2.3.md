@@ -21,8 +21,8 @@ top:
 
 | Network | Address |
 |---|---|
-| Base mainnet | [`0xac02F47a3E4451f96c715313C8894c3041413F3A`](https://basescan.org/address/0xac02F47a3E4451f96c715313C8894c3041413F3A) |
-| Base Sepolia | [`0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`](https://sepolia.basescan.org/address/0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C) |
+| Base mainnet | [`0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e`](https://basescan.org/address/0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e) |
+| Base Sepolia | [`0xC389D001C627C7fcE23405190d453906598c1607`](https://sepolia.basescan.org/address/0xC389D001C627C7fcE23405190d453906598c1607) |
 
 The runtime image is split between `UnifiedGridManagerV23` and a linked
 `UGMV23Linked` library (`DELEGATECALL`'d into) so the main contract stays

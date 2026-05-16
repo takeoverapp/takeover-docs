@@ -2,10 +2,11 @@
 
 > **Tier 2 placeholder.** Full annotated walkthrough of the V4 adapter.
 >
-> **Live v2.3 mainnet deployment:**
-> [`0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af`](https://basescan.org/address/0x50f30EE9543eC2e8905B29aC48180D5fC1Ee82Af).
-> See [Deployments](../../reference/deployments.md) for current
-> per-network status (Sepolia v2.3 adapters not yet redeployed).
+> **Live v2.3 deployments:**
+> mainnet [`0x06e31B4EfCCdb8450a2e29C590A4AF81843d3172`](https://basescan.org/address/0x06e31B4EfCCdb8450a2e29C590A4AF81843d3172),
+> Sepolia [`0xAd97b449277de911d740026087547c582AA1FB59`](https://sepolia.basescan.org/address/0xAd97b449277de911d740026087547c582AA1FB59).
+> See [Deployments](../../reference/deployments.md) for the full
+> address book.
 
 ## Pattern: V4 modifyLiquidities + IPoolSwap
 

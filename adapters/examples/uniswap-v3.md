@@ -2,10 +2,11 @@
 
 > **Tier 2 placeholder.** Full annotated walkthrough of the V3 adapter.
 >
-> **Live v2.3 mainnet deployment:**
-> [`0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9`](https://basescan.org/address/0x523c20e9c05Ec64F5d6Ad38c653FE3C90a88E5A9).
-> See [Deployments](../../reference/deployments.md) for current
-> per-network status (Sepolia v2.3 adapters not yet redeployed).
+> **Live v2.3 deployments:**
+> mainnet [`0x0205dA82768Ecd4C6E66f94e5A97F63B8dE1EbCf`](https://basescan.org/address/0x0205dA82768Ecd4C6E66f94e5A97F63B8dE1EbCf),
+> Sepolia [`0x0f8387cd6ecad2618a3255baf8ec84a803b2efdb`](https://sepolia.basescan.org/address/0x0f8387cd6ecad2618a3255baf8ec84a803b2efdb).
+> See [Deployments](../../reference/deployments.md) for the full
+> address book.
 
 ## Pattern: two-token swap-and-forward
 

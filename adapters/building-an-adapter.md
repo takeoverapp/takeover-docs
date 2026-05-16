@@ -13,8 +13,8 @@ Everything below assumes you've read [The yield adapter model](../overview/yield
 If you haven't, start there — the rest of this page won't make sense.
 
 > **Target version: UGM v2.3.** New adapters point their constructor at
-> the v2.3 UGM (mainnet `0xac02F47a3E4451f96c715313C8894c3041413F3A`,
-> Sepolia `0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`). UGM v2.3
+> the v2.3 UGM (mainnet `0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e`,
+> Sepolia `0xC389D001C627C7fcE23405190d453906598c1607`). UGM v2.3
 > caps every `collectYield` call at
 > `ADAPTER_COLLECT_GAS_CAP = 600,000` gas — exceeding the budget makes
 > UGM silently skip the adapter for that invocation, so internal

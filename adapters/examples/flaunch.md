@@ -4,11 +4,11 @@ The simplest reference adapter, and a good first read.
 
 > Source: [`takeoverapp/takeover-contracts/src/FlaunchYieldAdapter.sol`](https://github.com/takeoverapp/takeover-contracts/blob/main/src/FlaunchYieldAdapter.sol).
 >
-> **Live v2.3 mainnet deployment:**
-> [`0x2c242993A6959D9eF8e065C089054206e385245e`](https://basescan.org/address/0x2c242993A6959D9eF8e065C089054206e385245e).
-> Sepolia v2.3 trio is pending the next adapter redeploy — the
-> [Deployments](../../reference/deployments.md) page tracks the
-> current state per network.
+> **Live v2.3 deployments:**
+> mainnet [`0x1867650664c252186a214D5ed37CB1FD736b7bE6`](https://basescan.org/address/0x1867650664c252186a214D5ed37CB1FD736b7bE6),
+> Sepolia [`0x444f97f0db32fa12e3c444b9f83b4b51f2767f59`](https://sepolia.basescan.org/address/0x444f97f0db32fa12e3c444b9f83b4b51f2767f59).
+> See [Deployments](../../reference/deployments.md) for the full
+> address book.
 
 ## What it does
 

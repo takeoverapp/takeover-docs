@@ -40,9 +40,9 @@ token's revenue share" pulls Build a yield adapter only.
 - Target version is **UGM v2.3**. There is no longer a v2.2 surface
   in the docs — every example targets v2.3 unless explicitly noted.
 - Mainnet UGM v2.3 lives at
-  [`0xac02F47a3E4451f96c715313C8894c3041413F3A`](https://basescan.org/address/0xac02F47a3E4451f96c715313C8894c3041413F3A);
+  [`0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e`](https://basescan.org/address/0xF2DfBe1ef26AA82e9438dA95d5cC3007D3031F9e);
   Base Sepolia at
-  [`0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C`](https://sepolia.basescan.org/address/0xf67159948Dde0dA920Ba465Fca9D63f0c6EFD10C).
+  [`0xC389D001C627C7fcE23405190d453906598c1607`](https://sepolia.basescan.org/address/0xC389D001C627C7fcE23405190d453906598c1607).
   Always cross-reference [Deployments](../reference/deployments.md)
   before a write.
 - Grid sizes: `MIN_TOTAL_SEATS = 4`,
