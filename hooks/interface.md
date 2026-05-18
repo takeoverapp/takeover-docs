@@ -1,7 +1,14 @@
 # The `IGridHooksV23` interface
 
 `IGridHooksV23` is the surface UGM v2.3 grids call into when a creator
-attaches a module. It is a strict superset of v2.2's `IGridGovernanceHooks`:
+attaches a module. It is a strict superset of v2.2's `IGridGovernanceHooks`.
+
+> Need the ABI to wire your tooling? Download
+> [`IGridHooksV23.json`](https://takeover.fun/abis/IGridHooksV23.json) (or
+> grab it from `/builders/contracts` on the Builder portal). The same
+> file is regenerated on every contract build from
+> `takeover-contracts/out/IGridHooksV23.sol/IGridHooksV23.json` so it
+> never drifts from the live interface.
 
 ```solidity
 interface IGridHooksV23 is IGridGovernanceHooks {

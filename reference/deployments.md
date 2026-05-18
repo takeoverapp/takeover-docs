@@ -19,7 +19,10 @@ sepolia.ugmV23;         // 0xC389D001C627C7fcE23405190d453906598c1607
 ```
 
 The Builder portal `/builders/contracts` page reads from the same preset
-and is interactively switchable between mainnet and Sepolia.
+and is interactively switchable between mainnet and Sepolia. Builders
+who do not pull `@takeover/sdk` can grab the raw ABIs from
+[ABIs](#abis) below or directly from
+`https://takeover.fun/abis/<contract>.json`.
 
 ## Base mainnet (chain 8453)
 
@@ -89,6 +92,37 @@ Additional Flaunch NFT deployments the indexer tracks: `0xb4512bf57d50fbcb64a3ad
 | Flaunch Zap | [`0x25B747AeCA2612b9804b5c3BB272a3DAeFdC6eaa`](https://sepolia.basescan.org/address/0x25B747AeCA2612b9804b5c3BB272a3DAeFdC6eaa) |
 
 Additional Flaunch NFT deployment the indexer tracks: `0x7d375c9133721083df7b7e5cb0ed8fc78862dfe3`.
+
+## ABIs
+
+The same JSON files served by the Builder portal at
+`/abis/<contract>.json` (or downloadable from `/builders/contracts`):
+
+| Contract | ABI | Use it for |
+|---|---|---|
+| `UnifiedGridManagerV23` | [`UnifiedGridManagerV23.json`](https://takeover.fun/abis/UnifiedGridManagerV23.json) | Reading state, decoding logs, sending writes (addBatch, setPrice, claimFees, moduleTransferSeat) without the SDK |
+| `IGridHooksV23` | [`IGridHooksV23.json`](https://takeover.fun/abis/IGridHooksV23.json) | **Hook authors.** Implement on your own contract → guardian `setApprovedModule(true)` → grid owner `setHook` |
+| `IYieldAdapter` | [`IYieldAdapter.json`](https://takeover.fun/abis/IYieldAdapter.json) | Building a custom yield source. Two methods: `collectYield(bytes32[])`, `pendingYield(bytes32)` |
+| `IFeeReceiver` | [`IFeeReceiver.json`](https://takeover.fun/abis/IFeeReceiver.json) | Implementing a grid-aware fee splitter / treasury that receives `notifyDeposit(gridId, amount)` |
+| `FlaunchYieldAdapter` | [`FlaunchYieldAdapter.json`](https://takeover.fun/abis/FlaunchYieldAdapter.json) | Direct interaction with the live Flaunch adapter (deposits, queries) |
+| `V3YieldAdapter` | [`V3YieldAdapter.json`](https://takeover.fun/abis/V3YieldAdapter.json) | Direct interaction with the live Uniswap V3 adapter |
+| `V4YieldAdapter` | [`V4YieldAdapter.json`](https://takeover.fun/abis/V4YieldAdapter.json) | Direct interaction with the live Uniswap V4 adapter |
+
+The JSON files contain only the `abi` field of the corresponding
+Foundry artifact — no bytecode, no metadata. They are regenerated from
+[`takeover-contracts/out/`](https://github.com/takeoverapp/takeover-contracts)
+by `pnpm run abis:refresh` on a successful contract build, so they
+follow the same Solidity surface as the live deployments.
+
+> **Hook authors targeting v2.3 grids** should pair `IGridHooksV23.json`
+> with the [Hooks guide](../hooks/) — the interface adds five callbacks
+> on top of v2.2's `onSeatHolderChange`, plus an advisory `yieldWeight`
+> view that the SDK reads for off-chain ranking. UGM never consumes
+> `yieldWeight` itself: on-chain yield distribution stays uniform per
+> seat. UGM gas-caps every callback at 150,000 gas via
+> `try { ... } catch`, so a missing-selector revert in any callback is
+> interpreted as "module didn't implement; no-op". A v2.2 module that
+> only implements `onSeatHolderChange` keeps working unchanged.
 
 ## Asset hash conventions
 
